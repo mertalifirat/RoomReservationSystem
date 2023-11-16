@@ -1,13 +1,9 @@
-from collections import OrderedDict
 from event import Event
 from room import Room
 from datetime import datetime, timedelta
 
 
 class Organization:
-    room_list = OrderedDict()
-    room_index = 0
-
     def __init__(self, owner, name, map):
         self.owner = owner
         self.name = name
@@ -19,7 +15,7 @@ class Organization:
     def getName(self):
         return self.name
 
-    def getName(self):
+    def getMap(self):
         return self.map
 
     def updateOrganization(self, owner, name, map):
@@ -28,8 +24,7 @@ class Organization:
         self.map = map
 
     def addRoom(self, room):
-        self.room_list[self.room_index] = room
-        self.room_index += 1
+        self.map[room.getX()][room.getY()] = room
 
     def getRoom(self, id):
         return self.room_list.get(id)

@@ -1,9 +1,4 @@
-from datetime import datetime
-
-
 class Event:
-    room = None
-
     def __init__(
         self, title, description, category, capacity, duration, weekly, permissions
     ):
@@ -35,12 +30,6 @@ class Event:
 
     def getPermissions(self):
         return self.permissions
-
-    def getRoom(self):
-        return self.room
-
-    def setRoom(self, room):
-        self.room = room
 
     def __str__(self):
         return f"Event title: {self.title} Event description: {self.description} Event category: {self.category} Event capacity: {self.capacity} Event duration: {self.duration} Event weekly:{self.weekly}"

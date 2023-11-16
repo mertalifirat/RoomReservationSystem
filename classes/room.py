@@ -1,3 +1,7 @@
+# start = datetime.datetime(2022, 1, 1, 9, 0, 0) # January 1st, 2022 at 9:00 AM
+# end = datetime.datetime(2022, 1, 1, 10, 0, 0) # January 1st, 2022 at 10:00 AM
+
+
 class Room:
     def __init__(self, name, x, y, capacity, working_hours, permissions):
         self.name = name
