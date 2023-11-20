@@ -117,10 +117,32 @@ class Organization:
             self.eventList[event.getId()][1] = room.getId()
         
     def query(self,  title, category, rect=None, room=None):
+        queryResult = []
+        roomResult = []
+        eventResult = []
+        for event in self.eventList:
+            if (title in event.getTitle() and category in event.getCategory()):
+                eventResult.append(event)
         if (rect != None):
-            pass
+            x,y,w,h = rect
+            for room in self.roomList:
+                if(room.getX() >= x and room.getX() <= x+w and room.getY() >= y and room.getY() <= y+h):
+                    roomResult.append(room)
+            for event in eventResult:
+                for room in roomResult:
+                    start = room.getWorkingHours()[0]
+                    end = start + timedelta(minutes=event.getDuration())
+                    if (room.roomAvailable(start, end) and room.getCapacity() >= event.getCapacity() and self.roomList[room.getId()][1] == None):
+                        queryResult.append(event,room,start)   
         elif (room != None):
-            pass
+            start = room.getWorkingHours()[0]
+            for event in eventResult:
+                end = start + timedelta(minutes=event.getDuration())
+                if (room.roomAvailable(start, end) and room.getCapacity() >= event.getCapacity() and self.roomList[room.getId()][1] == None):
+                    queryResult.append(event,room,start)
+        return queryResult            
+                    
+
     
 
 room = Room(
