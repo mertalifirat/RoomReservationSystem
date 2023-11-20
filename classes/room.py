@@ -3,13 +3,20 @@
 
 
 class Room:
-    def __init__(self, name, x, y, capacity, working_hours, permissions):
+    def __init__(self, id, name, x, y, capacity, working_hours, permissions):
+        self.id = id
         self.name = name
         self.x = x
         self.y = y
         self.capacity = capacity
         self.working_hours = working_hours
         self.permissions = permissions
+
+    def __del__(self):
+        print(f"Room {self.name} deleted")
+
+    def getId(self):
+        return self.id
 
     def getName(self):
         return self.name
@@ -28,6 +35,14 @@ class Room:
 
     def getPermissions(self):
         return self.permissions
+
+    def updateRoom(self, name, x, y, capacity, working_hours, permissions):
+        self.name = name
+        self.x = x
+        self.y = y
+        self.capacity = capacity
+        self.working_hours = working_hours
+        self.permissions = permissions
 
     def roomAvailable(self, start, end):
         if (

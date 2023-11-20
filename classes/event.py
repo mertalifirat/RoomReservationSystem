@@ -1,7 +1,8 @@
 class Event:
     def __init__(
-        self, title, description, category, capacity, duration, weekly, permissions
+        self, id, title, description, category, capacity, duration, weekly, permissions
     ):
+        self.id = id
         self.title = title
         self.description = description
         self.category = category
@@ -9,6 +10,12 @@ class Event:
         self.duration = duration
         self.weekly = weekly
         self.permissions = permissions
+
+    def __del__(self):
+        print(f"Event {self.title} deleted")
+
+    def getId(self):
+        return self.id
 
     def getTitle(self):
         return self.title
@@ -30,6 +37,17 @@ class Event:
 
     def getPermissions(self):
         return self.permissions
+
+    def updateEvent(
+        self, title, description, category, capacity, duration, weekly, permissions
+    ):
+        self.title = title
+        self.description = description
+        self.category = category
+        self.capacity = capacity
+        self.duration = duration
+        self.weekly = weekly
+        self.permissions = permissions
 
     def __str__(self):
         return f"Event title: {self.title} Event description: {self.description} Event category: {self.category} Event capacity: {self.capacity} Event duration: {self.duration} Event weekly:{self.weekly}"
