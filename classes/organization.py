@@ -3,6 +3,7 @@ from .room import Room
 from datetime import datetime, timedelta
 import uuid
 from collections import OrderedDict
+import pdb
 
 
 class Organization:
@@ -14,6 +15,15 @@ class Organization:
         self.map = map
         self.roomList = OrderedDict()
         self.eventList = OrderedDict()
+
+    def __repr__(self):
+        result = f"Organization name: {self.name} Organization owner: {self.owner} Organization map: {self.map}\n"
+
+        for key in self.roomList:
+            result += f"{self.roomList[key]}\n"
+        for key in self.eventList:
+            result += f"{self.eventList[key]}\n"
+        return result
 
     def addRoom(self, room):
         x = room.getX()
@@ -114,8 +124,8 @@ class Organization:
     # Return a dictionary of keys are event ids and values are available rooms iterator for the given event list and rectangle
     def findSchedule(self, eventlist, rect, start, end):
         result = {}
-        for event in eventlist:
-            result[event.getId()] = self.findRoom(event, rect, start, end)
+        for _, event in eventlist.items():
+            result[event[0].getId()] = self.findRoom(event, rect, start, end)
         return result
 
     # Reassign the event to the room if room is available and conditions are satisfied
@@ -136,31 +146,33 @@ class Organization:
         roomResult = []
         eventResult = []
         # Matching events with title and category
-        for event in self.eventList:
-            if title in event.getTitle() and category in event.getCategory():
-                eventResult.append(event)
+        pdb.set_trace()
+        for _, event in self.eventList.items():
+            if title in event[0].getTitle() and category in event[0].getCategory():
+                eventResult.append(event[0])
         if rect != None:
             x, y, w, h = rect
             # Matching rooms with given rectangle
-            for room in self.roomList:
+            for _, value in self.roomList.items():
                 if (
-                    room.getX() >= x
-                    and room.getX() <= x + w
-                    and room.getY() >= y
-                    and room.getY() <= y + h
+                    value.getX() >= x
+                    and value.getX() <= x + w
+                    and value.getY() >= y
+                    and value.getY() <= y + h
                 ):
-                    roomResult.append(room)
-            for event in eventResult:
-                for room in roomResult:
-                    start = room.getWorkingHours()[0]
+                    roomResult.append(value)
+            for _, event in eventResult.items():
+                for value in roomResult:
+                    start = value.getWorkingHours()[0]
                     end = start + timedelta(minutes=event.getDuration())
                     if (
-                        room.roomAvailable(start, end)
-                        and room.getCapacity() >= event.getCapacity()
-                        and self.roomList[room.getId()][1] == None
+                        value.roomAvailable(start, end)
+                        and value.getCapacity() >= event.getCapacity()
+                        and self.roomList[value.getId()][1] == None
                     ):
-                        queryResult.append(event, room, start)
+                        queryResult.append(event, value, start)
         elif room != None:
+            pdb.set_trace()
             start = room.getWorkingHours()[0]
             for event in eventResult:
                 end = start + timedelta(minutes=event.getDuration())
@@ -169,5 +181,5 @@ class Organization:
                     and room.getCapacity() >= event.getCapacity()
                     and self.roomList[room.getId()][1] == None
                 ):
-                    queryResult.append(event, room, start)
+                    queryResult.append((event, room, start))
         return queryResult

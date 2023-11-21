@@ -9,7 +9,7 @@ def demo():
         "Room 1",
         0,
         0,
-        10,
+        100,
         (datetime(2020, 1, 1, 8, 0), datetime(2020, 1, 1, 18, 0)),
         ["admin", "user"],
     )
@@ -73,7 +73,7 @@ def demo():
 
     organization = Organization(
         "Doruk", "Organization 1", map
-    )  # Create a 2D array with empty lists
+    )  # Create a 2D array with None values
 
     organization.addRoom(room1)
     organization.addRoom(room2)
@@ -83,6 +83,8 @@ def demo():
     organization.addEvent(event1)
     organization.addEvent(event2)
     organization.addEvent(event3)
+
+    print(organization.query("Event 1", "Event 1 category", rect=None, room=room1))
 
 
 if __name__ == "__main__":

@@ -62,4 +62,4 @@ class Room:
         return f"Room name: {self.name} Room coord x: {self.x} Room coord y: {self.y} Room capacity: {self.capacity} Room working hours: {self.working_hours}"
 
     def __repr__(self):
-        return f'Room(\'{self.name}\', {self.x},{self.y},{self.capacity},({self.working_hours[0].strftime("%Y-%m-%d, %H:%M")}),({self.working_hours[1].strftime("%Y-%m-%d, %H:%M")}),{self.permissions},{repr(self.event)})'
+        return f'Room(\'{self.name}\', {self.x},{self.y},{self.capacity},({self.working_hours[0].strftime("%Y-%m-%d, %H:%M")}),({self.working_hours[1].strftime("%Y-%m-%d, %H:%M")}),{self.permissions})'
