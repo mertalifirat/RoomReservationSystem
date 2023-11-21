@@ -1,21 +1,23 @@
-from event import Event
-from room import Room
+from .event import Event
+from .room import Room
 from datetime import datetime, timedelta
 import uuid
 from collections import OrderedDict
 
-
 class Organization:
+    # Create
     def __init__(self, owner, name, map):
+        self.id = uuid.uuid4()
         self.owner = owner
         self.name = name
         self.map = map
         self.roomList = OrderedDict()
         self.eventList = OrderedDict()
 
-    # Create
     def addRoom(self, room):
-        self.map[room.getX()][room.getY()] = room
+        x=room.getX()
+        y=room.getY()
+        self.map[x][y] = room
         self.roomList[room.getId()] = [room, None] # None means room is not reserved
 
     def addEvent(self, event):
@@ -64,16 +66,18 @@ class Organization:
         room.updateRoom(name, x, y, capacity, working_hours, permissions)
         self.map[room.getX()][room.getY()] = room
 
-    def deleteRoom(self, id):
-        del self.roomList.pop(id)
-
     def updateEvent(self, id, title, description, category, capacity, duration, weekly):
         event = self.getEvent(id)
         event.updateEvent(title, description, category, capacity, duration, weekly)
 
+    # Delete
     def deleteEvent(self, id):
-        del self.eventList.pop(id)
+        self.eventList.pop(id)
 
+    def deleteRoom(self, id):
+        self.roomList.pop(id)
+
+    # Reserve the room for the event if room is available and conditions are satisfied
     def reserve(self, event, room, start):
         # If the room is available
         if (self.roomList[room.getId()][1] == None):
@@ -85,6 +89,7 @@ class Organization:
                     self.roomList[room.getId()][1] = event.getId()
                     self.eventList[event.getId()][1] = room.getId()
                     
+    # Return available rooms iterator for the given event and rectangle
     def findRoom(self, event, rect, start, end):
         x,y,w,h = rect
         available_rooms = []
@@ -99,14 +104,14 @@ class Organization:
 
         return iter(available_rooms)
     
-    # Assigning available rooms iterator to given events
+    # Return a dictionary of keys are event ids and values are available rooms iterator for the given event list and rectangle
     def findSchedule(self, eventlist, rect, start, end):
         result = {}
         for event in eventlist:
             result[event.getId()] = self.findRoom(event, rect, start, end)
         return result
         
-
+    # Reassign the event to the room if room is available and conditions are satisfied
     def reassign(self, event, room):
 
         oldRoomId = self.getRoom(self.eventList[event.getId()][1])
@@ -120,11 +125,13 @@ class Organization:
         queryResult = []
         roomResult = []
         eventResult = []
+        #Matching events with title and category
         for event in self.eventList:
             if (title in event.getTitle() and category in event.getCategory()):
                 eventResult.append(event)
         if (rect != None):
             x,y,w,h = rect
+            #Matching rooms with given rectangle
             for room in self.roomList:
                 if(room.getX() >= x and room.getX() <= x+w and room.getY() >= y and room.getY() <= y+h):
                     roomResult.append(room)

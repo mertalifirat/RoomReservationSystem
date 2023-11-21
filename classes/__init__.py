@@ -1,0 +1,1 @@
+all = ["Room", "Event", "Organization", "View"]

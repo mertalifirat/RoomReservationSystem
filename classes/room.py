@@ -1,30 +1,31 @@
 # start = datetime.datetime(2022, 1, 1, 9, 0, 0) # January 1st, 2022 at 9:00 AM
 # end = datetime.datetime(2022, 1, 1, 10, 0, 0) # January 1st, 2022 at 10:00 AM
-
+import uuid
 
 class Room:
-    def __init__(self, id, name, x, y, capacity, working_hours, permissions):
-        self.id = id
+    # Create
+    def __init__(self, name, x, y, capacity, working_hours, permissions):
+        self.id = uuid.uuid4()
         self.name = name
         self.x = x
         self.y = y
         self.capacity = capacity
         self.working_hours = working_hours
         self.permissions = permissions
-
+    # Delete
     def __del__(self):
         print(f"Room {self.name} deleted")
-
+    # Read
     def getId(self):
         return self.id
 
     def getName(self):
         return self.name
 
-    def getXCoord(self):
+    def getX(self):
         return self.x
 
-    def getYCoord(self):
+    def getY(self):
         return self.y
 
     def getCapacity(self):
@@ -35,7 +36,7 @@ class Room:
 
     def getPermissions(self):
         return self.permissions
-
+    # Update
     def updateRoom(self, name, x, y, capacity, working_hours, permissions):
         self.name = name
         self.x = x

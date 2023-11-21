@@ -1,8 +1,11 @@
+import uuid
+
 class Event:
+    #Create
     def __init__(
-        self, id, title, description, category, capacity, duration, weekly, permissions
+        self, title, description, category, capacity, duration, weekly, permissions
     ):
-        self.id = id
+        self.id = uuid.uuid4()
         self.title = title
         self.description = description
         self.category = category
@@ -10,10 +13,10 @@ class Event:
         self.duration = duration
         self.weekly = weekly
         self.permissions = permissions
-
+    #Delete
     def __del__(self):
         print(f"Event {self.title} deleted")
-
+    #Read
     def getId(self):
         return self.id
 
@@ -37,7 +40,7 @@ class Event:
 
     def getPermissions(self):
         return self.permissions
-
+    #Update
     def updateEvent(
         self, title, description, category, capacity, duration, weekly, permissions
     ):
