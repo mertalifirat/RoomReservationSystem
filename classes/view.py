@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from datetime import timedelta
 from organization import Organization
 import uuid
 
@@ -33,4 +34,13 @@ class View:
         return rooms
 
     def dayView(self, start, end):
-        pass
+        days = {}
+        for query in self.queryList:
+            queryRes = query.organization.query(
+                query.title, query.category, rect=query.rect, room=query.room
+            )
+            for res in queryRes:
+                if res[2] >= start and res[2] + timedelta(minutes=res[0].getDuration()) <= end:
+                    days[res[2]] = res
+                
+        return days

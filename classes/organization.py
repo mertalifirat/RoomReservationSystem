@@ -146,7 +146,6 @@ class Organization:
         roomResult = []
         eventResult = []
         # Matching events with title and category
-        pdb.set_trace()
         for _, event in self.eventList.items():
             if title in event[0].getTitle() and category in event[0].getCategory():
                 eventResult.append(event[0])
@@ -172,7 +171,6 @@ class Organization:
                     ):
                         queryResult.append(event, value, start)
         elif room != None:
-            pdb.set_trace()
             start = room.getWorkingHours()[0]
             for event in eventResult:
                 end = start + timedelta(minutes=event.getDuration())
