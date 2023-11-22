@@ -33,14 +33,23 @@ class View:
                     )
         return rooms
 
+    # Assuming start and end are given for a specific date intervals
+    # start : datetime.datetime
+    # end : datetime.datetime
     def dayView(self, start, end):
         days = {}
-        for query in self.queryList:
-            queryRes = query.organization.query(
-                query.title, query.category, rect=query.rect, room=query.room
-            )
-            for res in queryRes:
-                if res[2] >= start and res[2] + timedelta(minutes=res[0].getDuration()) <= end:
-                    days[res[2]] = res
-                
+        delta = timedelta(days=1)
+        tempStart = start
+        while tempStart <= end:
+            days[tempStart.date()] = []
+
+            for query in self.queryList:
+                queryRes = query.organization.query(
+                    query.title, query.category, rect=query.rect, room=query.room
+                )
+                for res in queryRes:
+                    if res[2].date() == tempStart.date():
+                        days[tempStart.date()].append(res)
+
+            tempStart += delta
         return days
