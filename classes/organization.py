@@ -17,7 +17,7 @@ class Organization:
         self.eventList = OrderedDict()
 
     def __repr__(self):
-        result = f"Organization name: {self.name} Organization owner: {self.owner} Organization map: {self.map}\n"
+        result = f"Organization name: {self.name} \n Organization owner: {self.owner} \n Organization map: {self.map}\n"
 
         for key in self.roomList:
             result += f"{self.roomList[key]}\n"
@@ -97,7 +97,7 @@ class Organization:
         if self.roomList[room.getId()][1] == None:
             end = start + timedelta(minutes=event.getDuration())
             # If the room is available at the given time
-            if room.roomAvailable(start, end):
+            if room.getWorkingHours()[0] <= start and end <= room.getWorkingHours()[1]:
                 # If the room has enough capacity
                 if room.getCapacity() >= event.getCapacity():
                     self.roomList[room.getId()][1] = event.getId()
@@ -124,16 +124,19 @@ class Organization:
     # Return a dictionary of keys are event ids and values are available rooms iterator for the given event list and rectangle
     def findSchedule(self, eventlist, rect, start, end):
         result = {}
-        for _, event in eventlist.items():
-            result[event[0].getId()] = self.findRoom(event, rect, start, end)
+        for event in eventlist:
+            result[event.getId()] = self.findRoom(event, rect, start, end)
         return result
 
     # Reassign the event to the room if room is available and conditions are satisfied
     def reassign(self, event, room):
-        oldRoomId = self.getRoom(self.eventList[event.getId()][1])
+        oldRoomId = self.eventList[event.getId()][1]
 
+        if oldRoomId == None:
+            return
         if (
-            room.roomAvailable(event.getStartTime(), event.getEndTime())
+            (room.getWorkingHours()[1] - room.getWorkingHours()[0]).total_seconds() / 60
+            >= event.getDuration()
             and room.getCapacity() >= event.getCapacity()
             and self.roomList[room.getId()][1] == None
         ):
@@ -154,28 +157,30 @@ class Organization:
             # Matching rooms with given rectangle
             for _, value in self.roomList.items():
                 if (
-                    value.getX() >= x
-                    and value.getX() <= x + w
-                    and value.getY() >= y
-                    and value.getY() <= y + h
+                    value[0].getX() >= x
+                    and value[0].getX() <= x + w
+                    and value[0].getY() >= y
+                    and value[0].getY() <= y + h
                 ):
-                    roomResult.append(value)
-            for _, event in eventResult.items():
+                    roomResult.append(value[0])
+            for event in eventResult:
                 for value in roomResult:
                     start = value.getWorkingHours()[0]
                     end = start + timedelta(minutes=event.getDuration())
                     if (
-                        value.roomAvailable(start, end)
+                        room.getWorkingHours()[0] <= start
+                        and end <= room.getWorkingHours()[1]
                         and value.getCapacity() >= event.getCapacity()
                         and self.roomList[value.getId()][1] == None
                     ):
-                        queryResult.append(event, value, start)
+                        queryResult.append((event, value, start))
         elif room != None:
             start = room.getWorkingHours()[0]
             for event in eventResult:
                 end = start + timedelta(minutes=event.getDuration())
                 if (
-                    room.roomAvailable(start, end)
+                    room.getWorkingHours()[0] <= start
+                    and end <= room.getWorkingHours()[1]
                     and room.getCapacity() >= event.getCapacity()
                     and self.roomList[room.getId()][1] == None
                 ):

@@ -1,6 +1,5 @@
 from collections import OrderedDict
-from datetime import timedelta
-from organization import Organization
+
 import uuid
 
 
@@ -21,17 +20,17 @@ class View:
     def roomView(self, start, end):
         queryRes = []
         rooms = {}
-        #Getting results from all queries  
-        for query in self.queryList:
-            queryRes.extend(query.organization.query(
-                query.title, query.category, rect=query.rect, room=query.room
-            ))
-        # Grouping (event,room,start) tuples by room and adding to the rooms dictionary    
-        for event,room,start in queryRes:
+        # Getting results from all queries
+        for key, query in self.queryList.items():
+            queryRes.extend(
+                query[0].query(query[1], query[2], rect=query[3], room=query[4])
+            )
+        # Grouping (event,room,start) tuples by room and adding to the rooms dictionary
+        for event, room, start in queryRes:
             if room in rooms:
                 rooms[room.getName()].append(event)
             else:
-                rooms[room.getName()] = [event]    
+                rooms[room.getName()] = [event]
         return rooms
 
     # Assuming start and end are given for a specific date intervals
@@ -40,14 +39,14 @@ class View:
     def dayView(self, start, end):
         queryRes = []
         days = {}
-        #Getting results from all queries
-        for query in self.queryList:
-            queryRes.extend(query.organization.query(
-                query.title, query.category, rect=query.rect, room=query.room
-            ))
+        # Getting results from all queries
+        for key, query in self.queryList.items():
+            queryRes.extend(
+                query[0].query(query[1], query[2], rect=query[3], room=query[4])
+            )
         # Grouping (event,room,start) tuples by day and adding to the days dictionary
         for res in queryRes:
             if res[2].date() not in days:
                 days[res[2].date()].append(res)
-            else:                   
+            else:
                 days[res[2].date()] = res
