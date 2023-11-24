@@ -223,14 +223,9 @@ class RoomReservationSystemDemo(cmd.Cmd):
                 print(e)
 
     def do_bye(self, arg):
+        """Exit the program: bye"""
         print("Thank you for using RoomReservationSystemDemo")
-        self.close()
         return True
-
-    def close(self):
-        if self.file:
-            self.file.close()
-            self.file = None
 
 
 if __name__ == "__main__":
