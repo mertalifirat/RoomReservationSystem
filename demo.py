@@ -188,7 +188,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         print(f"Event {event} reassigned to room {room}")
 
     def do_add_query_example(self, arg):
-        """Add a query to the view: add_query organization title category rect
+        """Add a query to the view: add_query title category rect
         room is assigned"""
         arg = arg.split(" ")
         organization = self.organization
