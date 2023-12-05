@@ -13,6 +13,8 @@ class Room:
         self.capacity = capacity
         self.working_hours = working_hours
         self.permissions = permissions
+        #Initially available reserve time is the start of working hours, it will change after reservations
+        self.availableReserveTime = working_hours[0]
 
     # Delete
     def __del__(self):
@@ -49,13 +51,8 @@ class Room:
         self.working_hours = working_hours
         self.permissions = permissions
 
-    def roomAvailable(self, start, end):
-        if start <= self.getWorkingHours()[0] and end >= self.getWorkingHours()[1]:
-            return True
-        return False
-
     def __str__(self):
         return f"Room name: {self.name} Room coord x: {self.x} Room coord y: {self.y} Room capacity: {self.capacity} Room working hours: {self.working_hours}"
 
     def __repr__(self):
-        return f'Room(Name:\'{self.name}\',x,y: {self.x},{self.y},Capacity: {self.capacity},Working hours:({self.working_hours[0].strftime("%Y-%m-%d, %H:%M")}),({self.working_hours[1].strftime("%Y-%m-%d, %H:%M")}),Permissions:{self.permissions})'
+        return f'Room(Name:\'{self.name}\',x,y: {self.x},{self.y},Capacity: {self.capacity},Working hours:({self.working_hours[0].strftime("%H:%M")}),({self.working_hours[1].strftime("%H:%M")}),Permissions:{self.permissions})'

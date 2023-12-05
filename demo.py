@@ -1,5 +1,6 @@
 import cmd
 from classes import *
+from datetime import time
 import datetime
 from classes.room import Room
 from classes.event import Event
@@ -17,7 +18,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         0,
         0,
         30,
-        (datetime(2020, 1, 1, 8, 0), datetime(2020, 1, 1, 18, 0)),
+        (time(8, 0), time(18, 0)),
         ["admin", "user"],
     )
     room2 = Room(
@@ -25,7 +26,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         1,
         0,
         20,
-        (datetime(2020, 2, 2, 8, 0), datetime(2020, 2, 2, 18, 0)),
+        (time(8, 0), time(18, 0)),
         ["admin", "user"],
     )
     room3 = Room(
@@ -33,7 +34,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         0,
         1,
         30,
-        (datetime(2020, 3, 3, 8, 0), datetime(2020, 3, 3, 18, 0)),
+        (time(8, 0), time(18, 0)),
         ["admin", "user"],
     )
     room4 = Room(
@@ -41,7 +42,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         1,
         1,
         40,
-        (datetime(2020, 4, 4, 8, 0), datetime(2020, 4, 4, 18, 0)),
+        (time(8, 0), time(18, 0)),
         ["admin", "user"],
     )
 
@@ -51,7 +52,8 @@ class RoomReservationSystemDemo(cmd.Cmd):
         "Event 1 category",
         10,
         60,
-        None,
+        #None,
+        datetime(2022,2,1),
         ["admin", "user"],
     )
     event2 = Event(
@@ -59,7 +61,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         "Event 2 description",
         "Event 2 category",
         20,
-        60,
+        70,
         None,
         ["admin", "user"],
     )
@@ -125,8 +127,10 @@ class RoomReservationSystemDemo(cmd.Cmd):
         """Reserve an event to a room: reserve starttime
         for now event1 reserves room1 examples is shown"""
         arg = arg.split(" ")
-        start = datetime.strptime(arg[0], "%Y-%m-%d-%H:%M")
-        self.organization.reserve(self.event1, self.room1, start)
+        start1 = datetime.strptime(arg[0], "%Y-%m-%d-%H:%M")
+        start2 = datetime.strptime(arg[1], "%Y-%m-%d-%H:%M")
+        self.organization.reserve(self.event1, self.room1, start1)
+        #self.organization.reserve(self.event2, self.room1, start2)
         print(self.organization.eventList[self.event1.getId()][1])
 
     # def query(self, title, category, rect=None, room=None)
