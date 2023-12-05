@@ -96,20 +96,29 @@ class Organization:
 
     #Check if the room is available between given dates, for that we are getting hour and minute from eventStart and eventEnd
     def isRoomAvailableBetweenHours(self, room, eventStart,eventEnd):
-        #Room doesn't have any reservations
-        if self.roomList[room.getId()][1]:
-            #Check if room is working for event duration
-            eventStartHourMinute = time(eventStart.hour,eventStart.minute)
-            eventEndHourMinute = time(eventEnd.hour,eventEnd.minute)
-            if room.getWorkingHours()[0] <= eventStartHourMinute and room.getWorkingHours()[1] >= eventEndHourMinute:
-                return True
-        else:
+        eventStartHourMinute = time(eventStart.hour,eventStart.minute)
+        eventEndHourMinute = time(eventEnd.hour,eventEnd.minute)
+
+        #Check if room is working between during the event
+        if room.getWorkingHours()[0] <= eventStartHourMinute and room.getWorkingHours()[1] >= eventEndHourMinute:
             #Check if there is no collisions with other events in the room
             for eventId,starttime,endtime in self.roomList[room.getId()][1]: 
-                if eventStart <= starttime or eventStart < endtime:
-                    if eventEnd < starttime or eventEnd <= endtime:
-                        return False
-            return True      
+                starttime = time(starttime.hour,starttime.minute)
+                endtime = time(endtime.hour,endtime.minute)
+                #Start time of the event is between start and end time of the other event
+                if starttime <= eventStartHourMinute and eventStartHourMinute < endtime:
+                    return False
+                #End time of the event is between start and end time of the other event
+                if starttime < eventEndHourMinute and eventEndHourMinute <= endtime:
+                    return False
+                #The other event is between start and end time of the event
+                if eventStartHourMinute <= starttime and endtime < eventEndHourMinute:
+                    return False
+            return True          
+        else:
+            return False
+            
+            
     # Reserve the room for the event if room is available and conditions are satisfied
     def reserve(self, event, room, start):
         #Calculate end time for given event
@@ -218,25 +227,17 @@ class Organization:
                     #Append room,[(eventId,starttime,endtime)]
                     roomResult.append(value)
             for event in eventResult:
-                for value in roomResult:
-                    start = value.getWorkingHours()[0]
-                    end = start + timedelta(minutes=event.getDuration())
-                    if (
-                        room.getWorkingHours()[0] <= start
-                        and end <= room.getWorkingHours()[1]
-                        and value.getCapacity() >= event.getCapacity()
-                        and self.roomList[value.getId()][1] == None
-                    ):
+                for roomValue in roomResult:
+                    start = roomValue[0].getWorkingHours()[0]
+                    end = start + time(0,event.getDuration())
+                    if self.isRoomAvailableBetweenHours(roomValue[0],start,end) and value[0].getCapacity() >= event.getCapacity():
                         queryResult.append((event, value, start))
         elif room != None:
             start = room.getWorkingHours()[0]
             for event in eventResult:
-                end = start + timedelta(minutes=event.getDuration())
+                end = start + time(0,event.getDuration())
                 if (
-                    room.getWorkingHours()[0] <= start
-                    and end <= room.getWorkingHours()[1]
-                    and room.getCapacity() >= event.getCapacity()
-                    and self.roomList[room.getId()][1] == None
+                    self.isRoomAvailableBetweenHours(room,start,end) and value[0].getCapacity() >= event.getCapacity()
                 ):
                     queryResult.append((event, room, start))
         return queryResult

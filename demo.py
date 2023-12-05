@@ -18,7 +18,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         0,
         0,
         30,
-        (time(8, 0), time(18, 0)),
+        (time(8,0), time(18,0)),
         ["admin", "user"],
     )
     room2 = Room(
@@ -52,8 +52,8 @@ class RoomReservationSystemDemo(cmd.Cmd):
         "Event 1 category",
         10,
         60,
-        #None,
-        datetime(2022,2,1),
+        None,
+        #datetime(2022,2,1),
         ["admin", "user"],
     )
     event2 = Event(
