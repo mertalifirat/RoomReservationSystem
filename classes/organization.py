@@ -1,6 +1,6 @@
 from .event import Event
 from .room import Room
-from datetime import datetime, timedelta,time
+from datetime import datetime, timedelta, time
 import uuid
 from collections import OrderedDict
 import pdb
@@ -29,7 +29,10 @@ class Organization:
         x = room.getX()
         y = room.getY()
         self.map[x][y] = room
-        self.roomList[room.getId()] = [room, []]  # First item is room object, second is list of (eventId,starttime,endtime) tuples
+        self.roomList[room.getId()] = [
+            room,
+            [],
+        ]  # First item is room object, second is list of FUTURE WORK {eventId: "asdadads",startdatetime: "2022.2.2.2.2",enddatetime:"2022.2.2.3.2"}
 
     def addEvent(self, event):
         self.eventList[event.getId()] = [
@@ -40,7 +43,7 @@ class Organization:
     # Read
     def getId(self):
         return self.id
-    
+
     def getOwner(self):
         return self.owner
 
@@ -94,51 +97,53 @@ class Organization:
     def deleteRoom(self, id):
         self.roomList.pop(id)
 
-    #Check if the room is available between given dates, for that we are getting hour and minute from eventStart and eventEnd
-    def isRoomAvailableBetweenHours(self, room, eventStart,eventEnd):
-        eventStartHourMinute = time(eventStart.hour,eventStart.minute)
-        eventEndHourMinute = time(eventEnd.hour,eventEnd.minute)
+    # Check if the room is available between given dates, for that we are getting hour and minute from eventStart and eventEnd
+    def isRoomAvailableBetweenHours(self, room, eventStartDateTime, eventEndDateTime):
+        eventStartHourMinute = time(eventStartDateTime.hour, eventStartDateTime.minute)
+        eventEndHourMinute = time(eventEndDateTime.hour, eventEndDateTime.minute)
 
-        #Check if room is working between during the event
-        if room.getWorkingHours()[0] <= eventStartHourMinute and room.getWorkingHours()[1] >= eventEndHourMinute:
-            #Check if there is no collisions with other events in the room
-            for eventId,starttime,endtime in self.roomList[room.getId()][1]: 
-                starttime = time(starttime.hour,starttime.minute)
-                endtime = time(endtime.hour,endtime.minute)
-                #Start time of the event is between start and end time of the other event
-                if starttime <= eventStartHourMinute and eventStartHourMinute < endtime:
+        # Check if room is working between during the event
+        if (
+            room.getWorkingHours()[0] <= eventStartHourMinute
+            and room.getWorkingHours()[1] >= eventEndHourMinute
+        ):
+            # Check if there is no collisions with other events in the room
+            for eventId, reservedStartDateTime, reservedEndDateTime in self.roomList[
+                room.getId()
+            ][1]:
+                if (
+                    eventEndDateTime <= reservedStartDateTime
+                    or reservedEndDateTime <= eventStartDateTime
+                ):
+                    continue
+                else:
                     return False
-                #End time of the event is between start and end time of the other event
-                if starttime < eventEndHourMinute and eventEndHourMinute <= endtime:
-                    return False
-                #The other event is between start and end time of the event
-                if eventStartHourMinute <= starttime and endtime < eventEndHourMinute:
-                    return False
-            return True          
+            return True
         else:
             return False
-            
-            
+
     # Reserve the room for the event if room is available and conditions are satisfied
     def reserve(self, event, room, start):
-        #Calculate end time for given event
+        # Calculate end time for given event
         end = start + timedelta(minutes=event.getDuration())
         # If the room is available at the given time
-        if self.isRoomAvailableBetweenHours(room,start,end):
+        if self.isRoomAvailableBetweenHours(room, start, end):
             # If the room has enough capacity add event to the room reservation list and add room to the event room list
             if room.getCapacity() >= event.getCapacity():
-                #Check if event is weekly or not
+                # Check if event is weekly or not
                 if event.getWeekly() is None:
-                    self.roomList[room.getId()][1].append((event.getId(),start,end))
+                    self.roomList[room.getId()][1].append((event.getId(), start, end))
                     self.eventList[event.getId()][1] = room.getId()
-                #If event is weekly add event to the room reservation list for every week
-                #TODO: Check if room has PERWRITE permission
+                # If event is weekly add event to the room reservation list for every week
+                # TODO: Check if room has PERWRITE permission
                 else:
                     while start < event.getWeekly():
-                        self.roomList[room.getId()][1].append((event.getId(),start,end))
+                        self.roomList[room.getId()][1].append(
+                            (event.getId(), start, end)
+                        )
                         self.eventList[event.getId()][1] = room.getId()
                         start += timedelta(days=7)
-                        end += timedelta(days=7)   
+                        end += timedelta(days=7)
 
     # Return available rooms iterator for the given event and rectangle
     def findRoom(self, event, rect, start, end):
@@ -148,13 +153,14 @@ class Organization:
         # Assuming top left and top right coordinates are not included
         for i in range(w):
             for j in range(h):
-                #Checking if there is a room in the given coordinates
+                # Checking if there is a room in the given coordinates
                 if self.map[x + i][y + j] == None:
                     continue
                 else:
                     room = self.map[x + i][y + j]
                     if (
-                        self.isRoomAvailableBetweenHours(start, end) and room.getCapacity() >= event.getCapacity()
+                        self.isRoomAvailableBetweenHours(start, end)
+                        and room.getCapacity() >= event.getCapacity()
                     ):
                         available_rooms.append(room)
 
@@ -169,43 +175,47 @@ class Organization:
 
     # Reassign the event to the room if room is available and conditions are satisfied
     def reassign(self, event, room):
-        #Getting [room,[eventId,starttime,endttime]] of old room
+        # Getting [room,[eventId,starttime,endttime]] of old room
         oldRoomId = self.eventList[event.getId()][1]
-        #Check if the event is already reserved a room
+        # Check if the event is already reserved a room
         if oldRoomId is not None:
             oldRoom = self.roomList[oldRoomId]
-            #Getting event start time and end time
-            eventTuple= ()
-            for eventId,start,end in oldRoom[1]:
-                print(eventId,start,end)
+            # Getting event start time and end time
+            eventTuple = ()
+            for eventId, start, end in oldRoom[1]:
+                print(eventId, start, end)
                 if eventId == event.getId():
-                    eventTuple = (eventId,start,end)
+                    eventTuple = (eventId, start, end)
                     break
-            eventId = event.getId()    
+            eventId = event.getId()
             starttime = eventTuple[1]
             endtime = eventTuple[2]
-            #Checking if new room is available
-            if self.isRoomAvailableBetweenHours(room,starttime,endtime):
+            # Checking if new room is available
+            if self.isRoomAvailableBetweenHours(room, starttime, endtime):
                 if room.getCapacity() >= event.getCapacity():
-                    #If event is not weekly
+                    # If event is not weekly
                     if event.getWeekly() is None:
-                        #Removing event from old room
-                        oldRoom[1].remove((eventId,starttime,endtime))
-                        #Adding event to new room
-                        self.roomList[room.getId()][1].append((eventId,starttime,endtime))
-                    #If event is weekly    
-                    else:    
+                        # Removing event from old room
+                        oldRoom[1].remove((eventId, starttime, endtime))
+                        # Adding event to new room
+                        self.roomList[room.getId()][1].append(
+                            (eventId, starttime, endtime)
+                        )
+                    # If event is weekly
+                    else:
                         while starttime < event.getWeekly():
-                            #Removing event from old room
-                            oldRoom[1].remove((eventId,starttime,endtime))
-                            #Adding event to new room
-                            self.roomList[room.getId()][1].append((eventId,starttime,endtime))
+                            # Removing event from old room
+                            oldRoom[1].remove((eventId, starttime, endtime))
+                            # Adding event to new room
+                            self.roomList[room.getId()][1].append(
+                                (eventId, starttime, endtime)
+                            )
                             starttime += timedelta(days=7)
                             endtime += timedelta(days=7)
-                    #Updating event room
+                    # Updating event room
                     self.eventList[event.getId()][1] = room.getId()
 
-    #Needs to be changed
+    # Needs to be changed
     def query(self, title, category, rect=None, room=None):
         queryResult = []
         roomResult = []
@@ -224,20 +234,24 @@ class Organization:
                     and value[0].getY() >= y
                     and value[0].getY() <= y + h
                 ):
-                    #Append room,[(eventId,starttime,endtime)]
+                    # Append room,[(eventId,starttime,endtime)]
                     roomResult.append(value)
             for event in eventResult:
                 for roomValue in roomResult:
                     start = roomValue[0].getWorkingHours()[0]
-                    end = start + time(0,event.getDuration())
-                    if self.isRoomAvailableBetweenHours(roomValue[0],start,end) and value[0].getCapacity() >= event.getCapacity():
+                    end = start + time(0, event.getDuration())
+                    if (
+                        self.isRoomAvailableBetweenHours(roomValue[0], start, end)
+                        and value[0].getCapacity() >= event.getCapacity()
+                    ):
                         queryResult.append((event, value, start))
         elif room != None:
             start = room.getWorkingHours()[0]
             for event in eventResult:
-                end = start + time(0,event.getDuration())
+                end = start + time(0, event.getDuration())
                 if (
-                    self.isRoomAvailableBetweenHours(room,start,end) and value[0].getCapacity() >= event.getCapacity()
+                    self.isRoomAvailableBetweenHours(room, start, end)
+                    and value[0].getCapacity() >= event.getCapacity()
                 ):
                     queryResult.append((event, room, start))
         return queryResult

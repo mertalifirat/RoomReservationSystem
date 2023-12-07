@@ -18,7 +18,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         0,
         0,
         30,
-        (time(8,0), time(18,0)),
+        (time(8, 0), time(18, 0)),
         ["admin", "user"],
     )
     room2 = Room(
@@ -53,7 +53,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         10,
         60,
         None,
-        #datetime(2022,2,1),
+        # datetime(2022,2,1),
         ["admin", "user"],
     )
     event2 = Event(
@@ -130,7 +130,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         start1 = datetime.strptime(arg[0], "%Y-%m-%d-%H:%M")
         start2 = datetime.strptime(arg[1], "%Y-%m-%d-%H:%M")
         self.organization.reserve(self.event1, self.room1, start1)
-        #self.organization.reserve(self.event2, self.room1, start2)
+        self.organization.reserve(self.event2, self.room1, start2)
         print(self.organization.eventList[self.event1.getId()][1])
 
     # def query(self, title, category, rect=None, room=None)
