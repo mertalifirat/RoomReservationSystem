@@ -5,4 +5,4 @@ from classes.user import User
 server = Server(1422,1428)
 
 server.start_server()
-del server
+

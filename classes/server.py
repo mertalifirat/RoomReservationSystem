@@ -54,7 +54,6 @@ class Server:
 
         while True:
             conn, addr = self.notifcation_sock.accept()
-            print("new client")
             NotificationHandler(conn,addr, self.db).start()
 
     def start_server(self):
@@ -74,6 +73,7 @@ class RequestHandler(Thread):
         Thread.__init__(self)
 
     def run(self):
+        print("Request server started")
         client_user_id = None
         notexit = True
         received_msg = self.conn.recv(1024)
@@ -172,6 +172,7 @@ class RequestHandler(Thread):
                         self.conn.send("Not authorized, please login".encode("utf8")) 
             elif request_type ==  "EXIT":
                 notexit = False
+                pickle.dump(Server.organization_and_user_list,open("organizations.p","wb"))
                 self.conn.send("Exit successful".encode("utf8"))
 
 
@@ -189,4 +190,25 @@ class NotificationHandler(Thread):
 
     def run(self):
         #For notifications
-        print("Notification server started")       
+        print("Notification server started")
+        client_user_id = None
+        notexit = True
+        received_msg = self.conn.recv(1024)
+        while notexit and received_msg != b"":
+            decode8 = received_msg.decode("utf8")
+            try:
+                request = json.loads(decode8)
+            except JSONDecodeError:
+                notexit = False
+
+            request_type = request["command"]
+            request["user_id"] = client_user_id
+
+            if request_type ==  "EXIT":
+                notexit = False
+                self.conn.send("Exit successful".encode("utf8"))
+
+            received_msg = self.conn.recv(1024)
+              
+        #Kill connection    
+        self.conn.close()       
