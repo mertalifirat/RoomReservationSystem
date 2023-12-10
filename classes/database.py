@@ -8,6 +8,12 @@ class Database:
         self.curs.execute(
             "create table if not exists Users(user_id,username, email, fullname, password)"
         )
+        self.curs.execute(
+            "create table if not exists Organizations(organization_id,owner,name,map,room_list,event_list,permissons)"
+        )
+        self.curs.execute(
+            "create table if not exists Views(view_id,owner)"
+        )
 
     def insert(self, table_name, field_names, *data):
         query = f'INSERT INTO {table_name} {field_names} VALUES ( {",".join(["?"] * len(data))})'

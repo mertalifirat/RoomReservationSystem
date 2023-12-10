@@ -7,7 +7,8 @@ from classes.event import Event
 from classes.organization import Organization
 from classes.view import View
 from datetime import datetime
-
+import pickle
+from classes.singletonCatalgoue import Catalogue
 
 class RoomReservationSystemDemo(cmd.Cmd):
     intro = "Welcome to the Demo of the Room Reservation System. Type help or ? to list commands.\n"
@@ -78,7 +79,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
     map = [[None for _ in range(3)] for _ in range(3)]
 
     organization = Organization(
-        "Doruk", "Organization 1", map
+        "Doruk", "Organization 1", map ,{"admin" : ["LIST"], "user" : ["ACCESS"]}
     )  # Create a 2D array with None values
 
     eventList = [event1, event2, event3]
@@ -91,7 +92,13 @@ class RoomReservationSystemDemo(cmd.Cmd):
     organization.addEvent(event2)
     organization.addEvent(event3)
 
+    catalogue = Catalogue()
+    catalogue.add(organization)
     view = View("Doruk")
+    def __del__(self):
+        print("Server shutdown, file saved")
+        print(self.catalogue.getObjectList())
+        pickle.dump(self.catalogue,open("organizations.p","wb"))
 
     def do_add_room(self, arg):
         """Add a room to the organization: add_room name x y capacity start end permissions"""

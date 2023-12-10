@@ -11,11 +11,12 @@ class User:
         self.fullname = fullname
         self.passwd = passwd
         self.token = None
+        self.attachedOrganization = None
 
     def __del__(self):
         print("User {} deleted".format(self.username))
 
-    def get_id(self):
+    def getId(self):
         return self.id
 
     def get_username(self):
@@ -32,6 +33,9 @@ class User:
 
     def get_token(self):
         return self.token
+    
+    def get_attachedOrganization(self):
+        return self.attachedOrganization
 
     def update_username(self, username):
         self.username = username
@@ -47,6 +51,9 @@ class User:
 
     def update_token(self, token):
         self.token = token
+
+    def update_attachedOrganization(self, attachedOrganization):
+        self.attachedOrganization = attachedOrganization    
 
     def auth(self, plainpass):
         return self.passwd == plainpass

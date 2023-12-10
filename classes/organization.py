@@ -4,17 +4,21 @@ from datetime import datetime, timedelta, time
 import uuid
 from collections import OrderedDict
 import pdb
-
+from .singletonCatalgoue import Catalogue
 
 class Organization:
+    
     # Create
-    def __init__(self, owner, name, map):
+    def __init__(self, owner, name, map,permissions):
         self.id = uuid.uuid4()
         self.owner = owner
         self.name = name
         self.map = map
         self.roomList = OrderedDict()
         self.eventList = OrderedDict()
+        self.permissions = permissions
+        #Adding created organization to the org_list
+        #Catalogue.add(self)
 
     def __repr__(self):
         result = f"Organization name: {self.name} \n Organization owner: {self.owner} \n Organization map: {self.map}\n"
@@ -24,7 +28,24 @@ class Organization:
         for key in self.eventList:
             result += f"{self.eventList[key]}\n"
         return result
-
+ 
+    def listObjects(self):
+        return self.__repr__()
+    
+    def listRooms(self):
+        result = ""
+        for key in self.roomList:
+            result += f"{self.roomList[key]}\n"
+        return result
+    
+    def attach(self,id):
+        if id in self.roomList.keys():
+            return self.roomList[id]
+        elif id in self.eventList.keys():
+            return self.eventList[id]
+        else:
+            return None
+        
     def addRoom(self, room):
         x = room.getX()
         y = room.getY()

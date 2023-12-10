@@ -6,17 +6,21 @@ class Singleton(object):
         return cls._inst
 
 class Catalogue(Singleton):
-    objectList = {}
+    
     def __init__(self):
+        self.objectList = {}
         if not hasattr(self,'objectCount'):
             self.objectCount = 0
 
     def getCount(self):
         return self.objectCount
     
+    def getObjectList(self):
+        return self.objectList
+    
     def add(self,object):
         self.objectList[object.getId()] = object
         self.objectCount += 1
 
-    def get(self,object):
-        return self.objectList[object.getId()]
+    def get(self,id):
+        return self.objectList[id]
