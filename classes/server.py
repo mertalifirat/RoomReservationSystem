@@ -5,6 +5,7 @@ import sqlite3
 import json
 from json import JSONDecodeError
 from .database import Database
+from .room import Room
 from .user import User
 import hashlib
 import pickle
@@ -24,7 +25,7 @@ class Server:
         sql_db = sqlite3.connect("database.db", check_same_thread=False)
         try:
             self.organization_and_user_list = pickle.load(open("organizations.p","rb"))
-            print(self.organization_and_user_list.getObjectList().keys())
+            print(self.organization_and_user_list.getOrganizationList().keys())
         except FileNotFoundError as err:
             print("error:" + str(err))
                
@@ -101,7 +102,7 @@ class RequestHandler(Thread):
                     user_id = str(user.getId())
 
                     #Add user to catalogue
-                    Server.organization_and_user_list.add(user)
+                    Server.organization_and_user_list.addUser(user)
 
                     self.db.insert(
                         "Users",
@@ -132,12 +133,13 @@ class RequestHandler(Thread):
                         print("Login failed")
                         self.conn.send("Login failed".encode("utf8"))
 
-            elif request_type ==  "LIST_OBJECT": #Listing rooms in organization
+            elif request_type ==  "LIST_OBJECT": #List organizations
                 with Server.mutex:
+                    result = ""
                     if client_user_id is not None:
-                        organization_id = uuid.UUID(request["organization_id"])
-                        org = Server.organization_and_user_list.get(organization_id)
-                        self.conn.send(str.encode(org.listObjects()))
+                        for organization in Server.organization_and_user_list.getOrganizationList().values():
+                            result += organization.getOrganizationInfo()
+                        self.conn.send(str.encode(result))
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))    
             
@@ -145,16 +147,16 @@ class RequestHandler(Thread):
                 with Server.mutex:
                     if client_user_id is not None:
                         organization_id = uuid.UUID(request["organization_id"])
-                        user = Server.organization_and_user_list.get(client_user_id)
+                        user = Server.organization_and_user_list.getUser(client_user_id)
                         user.update_attachedOrganization(organization_id)
                         self.conn.send(str.encode("Organization attached"))
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))
 
-            elif request_type ==  "LIST_ROOM": #Listing rooms
+            elif request_type == "LIST_ROOM": #Listing rooms
                 with Server.mutex:
                     if client_user_id is not None:
-                        organization_id = Server.organization_and_user_list.get(client_user_id).get_attachedOrganization()
+                        organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
                         if organization_id is None:
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
@@ -163,6 +165,130 @@ class RequestHandler(Thread):
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))
 
+            elif request_type == "ADD_ROOM": #Adding room
+                with Server.mutex:
+                    if client_user_id is not None:
+                        organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
+                        if organization_id is None:
+                            self.conn.send("Please attach to an organization first".encode("utf8"))
+                        else:    
+                            org = Server.organization_and_user_list.get(organization_id)
+                            room = Room(request["room_name"],request["x"],request["y"],request["capacity"],request["working_hours"],request["permissions"])
+                            org.addRoom(room)
+                            self.conn.send(str.encode("Room added"))
+                    else:
+                        self.conn.send("Not authorized, please login".encode("utf8"))
+
+            elif request_type == "ACCESS": #Accessing rooms and events
+                with Server.mutex:
+                    if client_user_id is not None:
+                        organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
+                        if organization_id is None:
+                            self.conn.send("Please attach to an organization first".encode("utf8"))
+                        else:    
+                            org = Server.organization_and_user_list.get(organization_id)
+                            self.conn.send(str.encode(org.accessRoomsandEvents()))
+                    else:
+                        self.conn.send("Not authorized, please login".encode("utf8"))
+
+            elif request_type == "DELETE_ROOM": #Deleting room
+                with Server.mutex:
+                    if client_user_id is not None:
+                        organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
+                        if organization_id is None:
+                            self.conn.send("Please attach to an organization first".encode("utf8"))
+                        else:    
+                            org = Server.organization_and_user_list.get(organization_id)
+                            #deleting events in room
+                            for eventId,_,_ in org.getRoom(request["room_id"])[1]:
+                                org.deleteEvent(eventId)
+                            #deleting the room    
+                            org.deleteRoom(request["room_id"])
+                            self.conn.send(str.encode("Room deleted"))
+                    else:
+                        self.conn.send("Not authorized, please login".encode("utf8"))
+
+            elif request_type == "LIST_RESERVED_EVENTS": #List reserved events in given room
+                with Server.mutex:
+                    if client_user_id is not None:
+                        organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
+                        if organization_id is None:
+                            self.conn.send("Please attach to an organization first".encode("utf8"))
+                        else:    
+                            result = ""
+                            org = Server.organization_and_user_list.get(organization_id)
+                            for eventId,start,end in org.getRoom(request["room_id"])[1]:
+                                result += f"Event name: {org.getEvent(eventId)[0].getTitle()} Start: {start} End: {end}\n"
+                            self.conn.send(str.encode(result))
+                    else:
+                        self.conn.send("Not authorized, please login".encode("utf8"))
+
+            elif request_type == "RESERVE": #Reserve room with given event
+                with Server.mutex:
+                    if client_user_id is not None:
+                        organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
+                        if organization_id is None:
+                            self.conn.send("Please attach to an organization first".encode("utf8"))
+                        else:    
+                            org = Server.organization_and_user_list.get(organization_id)
+                            org.reserveRoom(org.getRoom(request["room_id"])[0],org.getEvent(request["event_id"])[0],request["start"],request["end"])
+                            self.conn.send(str.encode("Room reserved"))
+                    else:
+                        self.conn.send("Not authorized, please login".encode("utf8"))
+
+            elif request_type == "DELETE_RESERVATIONS": #Delete reservations in given room
+                with Server.mutex:
+                    if client_user_id is not None:
+                        organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
+                        if organization_id is None:
+                            self.conn.send("Please attach to an organization first".encode("utf8"))
+                        else:    
+                            org = Server.organization_and_user_list.get(organization_id)
+                            for eventId,start,end in org.getRoom(request["room_id"])[1]:
+                                org.getEvent(eventId)[1] = None
+                                org.getRoom(request["room_id"])[1].remove((eventId,start,end))
+                            self.conn.send(str.encode("Reservations deleted"))
+                    else:
+                        self.conn.send("Not authorized, please login".encode("utf8"))
+
+            elif request_type == "READ_EVENTS":
+                with Server.mutex:
+                    if client_user_id is not None:
+                        organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
+                        result = ""
+                        if organization_id is None:
+                            self.conn.send("Please attach to an organization first".encode("utf8"))
+                        else:    
+                            org = Server.organization_and_user_list.get(organization_id)
+                            self.conn.send(str.encode(org.listEvents()))
+                    else:
+                        self.conn.send("Not authorized, please login".encode("utf8"))
+            elif request_type == "UPDATE_EVENT":
+                with Server.mutex:
+                    if client_user_id is not None:
+                        organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
+
+                        if organization_id is None:
+                            self.conn.send("Please attach to an organization first".encode("utf8"))
+                        else:    
+                            org = Server.organization_and_user_list.get(organization_id)
+                            org.updateEvent(request["title"],request["description"],request["category"],request["capacity"],request["duration"],request["weekly"],request["permissions"])
+                            self.conn.send(str.encode("Event updated"))
+                    else:
+                        self.conn.send("Not authorized, please login".encode("utf8"))
+            elif request_type == "DELETE_EVENT":
+                with Server.mutex:
+                    if client_user_id is not None:
+                        organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
+
+                        if organization_id is None:
+                            self.conn.send("Please attach to an organization first".encode("utf8"))
+                        else:    
+                            org = Server.organization_and_user_list.get(organization_id)
+                            org.deleteEvent(request["event_id"])
+                            self.conn.send(str.encode("Event deleted"))
+                    else:
+                        self.conn.send("Not authorized, please login".encode("utf8"))                        
             elif request_type == "LOGOUT": #Logout
                 with Server.mutex:
                     if client_user_id is not None:

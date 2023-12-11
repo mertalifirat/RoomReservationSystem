@@ -13,8 +13,7 @@ class Room:
         self.capacity = capacity
         self.working_hours = working_hours
         self.permissions = permissions
-        #Initially available reserve time is the start of working hours, it will change after reservations
-        self.availableReserveTime = working_hours[0]
+        
 
     # Delete
     def __del__(self):

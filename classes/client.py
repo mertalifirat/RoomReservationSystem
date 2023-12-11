@@ -86,7 +86,6 @@ class Client:
                     params = request.split(" ")
                     request = {
                         "command": "LIST_OBJECT",
-                        "organization_id": params[1],
                     }
                 self.request_sock.send(str.encode(json.dumps(request)))
                 print(self.request_sock.recv(1024).decode("utf8"))
@@ -110,6 +109,96 @@ class Client:
                 self.request_sock.send(str.encode(json.dumps(request)))
                 print(self.request_sock.recv(1024).decode("utf8"))
 
+            elif request_type == "ADD_ROOM":
+                if not is_json:
+                    params = request.split(" ")
+                    request = {
+                        "command": "ADD_ROOM",
+                        "room_name": params[1],
+                        "room_x": params[2],
+                        "room_y": params[3],
+                        "capacity": params[4],
+                        "working_hours": params[5],
+                        "permissions": params[6],
+                    }
+                self.request_sock.send(str.encode(json.dumps(request)))
+                print(self.request_sock.recv(1024).decode("utf8"))
+
+            elif request_type == "ACCESS":
+                if not is_json:
+                    params = request.split(" ")
+                    request = {
+                        "command": "ACCESS",
+                    }
+                self.request_sock.send(str.encode(json.dumps(request)))
+                print(self.request_sock.recv(1024).decode("utf8"))
+
+            elif request_type == "DELETE_ROOM":
+                if not is_json:
+                    params = request.split(" ")
+                    request = {
+                        "command": "DELETE_ROOM",
+                        "room_id": params[1],
+                    }
+                self.request_sock.send(str.encode(json.dumps(request)))
+                print(self.request_sock.recv(1024).decode("utf8"))
+
+            elif request_type == "LIST_RESERVED_EVENTS":
+                if not is_json:
+                    params = request.split(" ")
+                    request = {
+                        "command": "LIST_RESERVED_EVENTS",
+                        "room_id": params[1],
+                    }
+                self.request_sock.send(str.encode(json.dumps(request)))
+                print(self.request_sock.recv(1024).decode("utf8"))
+
+            elif request_type == "RESERVE":
+                if not is_json:
+                    params = request.split(" ")
+                    request = {
+                        "command": "RESERVE",
+                        "room_id": params[1],
+                        "event_id": params[2],
+                        "start": params[3],
+                        "end": params[4],
+                    }
+                self.request_sock.send(str.encode(json.dumps(request)))
+                print(self.request_sock.recv(1024).decode("utf8"))
+
+            elif request_type == "DELETE_RESERVATIONS":
+                if not is_json:
+                    params = request.split(" ")
+                    request = {
+                        "command": "DELETE_RESERVATIONS",
+                        "room_id": params[1],
+                    }
+                self.request_sock.send(str.encode(json.dumps(request)))
+                print(self.request_sock.recv(1024).decode("utf8"))
+            elif request_type == "UPDATE_EVENT":
+                if not is_json:
+                    params = request.split(" ")
+                    request = {
+                        "command": "UPDATE_EVENT",
+                        "title": params[1],
+                        "description": params[2],
+                        "category": params[3],
+                        "capacity": params[4],
+                        "duration": params[5],
+                        "weekly": params[6],
+                        "permissions": params[7],
+                    }
+                self.request_sock.send(str.encode(json.dumps(request)))
+                print(self.request_sock.recv(1024).decode("utf8"))
+            elif request_type == "DELETE_EVENT":
+                if not is_json:
+                    params = request.split(" ")
+                    request = {
+                        "command": "DELETE_EVENT",
+                        "event_id": params[1],
+                    }
+                self.request_sock.send(str.encode(json.dumps(request)))
+                print(self.request_sock.recv(1024).decode("utf8"))                   
             elif request_type == "LOGOUT":
                 if not is_json:
                     params = request.split(" ")

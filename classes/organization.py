@@ -28,6 +28,10 @@ class Organization:
         for key in self.eventList:
             result += f"{self.eventList[key]}\n"
         return result
+    
+    def getOrganizationInfo(self):
+        result = f"Organization id: {self.id} \n Organization name: {self.name} \n Organization owner: {self.owner} \n Organization map: {self.map}\n"
+        return result
  
     def listObjects(self):
         return self.__repr__()
@@ -37,14 +41,26 @@ class Organization:
         for key in self.roomList:
             result += f"{self.roomList[key]}\n"
         return result
+    def listEvents(self):
+        result = ""
+        for key in self.eventList:
+            result += f"{self.eventList[key]}\n"
+        return result
+    def accessRoomsandEvents(self):
+        result = ""
+        for key in self.roomList:
+            result += f"{self.roomList[key]}\n"
+        for key in self.eventList:
+            result += f"{self.eventList[key]}\n"
+        return result
     
-    def attach(self,id):
-        if id in self.roomList.keys():
-            return self.roomList[id]
-        elif id in self.eventList.keys():
-            return self.eventList[id]
-        else:
-            return None
+    # def attach(self,id):
+    #     if id in self.roomList.keys():
+    #         return self.roomList[id]
+    #     elif id in self.eventList.keys():
+    #         return self.eventList[id]
+    #     else:
+    #         return None
         
     def addRoom(self, room):
         x = room.getX()
@@ -53,7 +69,7 @@ class Organization:
         self.roomList[room.getId()] = [
             room,
             [],
-        ]  # First item is room object, second is list of FUTURE WORK {eventId: "asdadads",startdatetime: "2022.2.2.2.2",enddatetime:"2022.2.2.3.2"}
+        ]  # First item is room object, second is list (eventId,start,end) of FUTURE WORK {eventId: "asdadads",startdatetime: "2022.2.2.2.2",enddatetime:"2022.2.2.3.2"}
 
     def addEvent(self, event):
         self.eventList[event.getId()] = [
@@ -81,10 +97,15 @@ class Organization:
         return self.eventList
 
     def getRoom(self, id):
-        return self.roomList.get(id)
+        return self.roomList.get(id)[0]
 
     def getEvent(self, id):
-        return self.eventList.get(id)
+        return self.eventList.get(id)[0]
+    def getEventsReservedRoom(self, id):
+        return self.roomList.get(id)[1]
+
+    def getRoomReservedByEvent(self, id):
+        return self.eventList.get(id)[1]
 
     # Update
     def updateOrganization(self, owner, name, map):
@@ -113,10 +134,10 @@ class Organization:
 
     # Delete
     def deleteEvent(self, id):
-        self.eventList.pop(id)
+        del self.eventList.pop(id)
 
     def deleteRoom(self, id):
-        self.roomList.pop(id)
+        del self.roomList.pop(id)
 
     # Check if the room is available between given dates, for that we are getting hour and minute from eventStart and eventEnd
     def isRoomAvailableBetweenHours(self, room, eventStartDateTime, eventEndDateTime):
@@ -129,9 +150,7 @@ class Organization:
             and room.getWorkingHours()[1] >= eventEndHourMinute
         ):
             # Check if there is no collisions with other events in the room
-            for eventId, reservedStartDateTime, reservedEndDateTime in self.roomList[
-                room.getId()
-            ][1]:
+            for eventId, reservedStartDateTime, reservedEndDateTime in self.getEventsReservedRoom(room.getId()):
                 if (
                     eventEndDateTime <= reservedStartDateTime
                     or reservedEndDateTime <= eventStartDateTime
@@ -153,16 +172,16 @@ class Organization:
             if room.getCapacity() >= event.getCapacity():
                 # Check if event is weekly or not
                 if event.getWeekly() is None:
-                    self.roomList[room.getId()][1].append((event.getId(), start, end))
-                    self.eventList[event.getId()][1] = room.getId()
+                    self.getEventsReservedRoom[room.getId()].append((event.getId(), start, end))
+                    self.getRoomReservedByEvent[event.getId()] = room.getId()
                 # If event is weekly add event to the room reservation list for every week
                 # TODO: Check if room has PERWRITE permission
                 else:
                     while start < event.getWeekly():
-                        self.roomList[room.getId()][1].append(
+                        self.getEventsReservedRoom(room.getId()).append(
                             (event.getId(), start, end)
                         )
-                        self.eventList[event.getId()][1] = room.getId()
+                        self.getRoomReservedByEvent[event.getId()]  = room.getId()
                         start += timedelta(days=7)
                         end += timedelta(days=7)
 
@@ -197,13 +216,13 @@ class Organization:
     # Reassign the event to the room if room is available and conditions are satisfied
     def reassign(self, event, room):
         # Getting [room,[eventId,starttime,endttime]] of old room
-        oldRoomId = self.eventList[event.getId()][1]
+        oldRoomId = self.getRoomReservedByEvent[event.getId()] 
         # Check if the event is already reserved a room
         if oldRoomId is not None:
-            oldRoom = self.roomList[oldRoomId]
+            oldRoomReservations = self.getEventsReservedRoom(oldRoomId)
             # Getting event start time and end time
             eventTuple = ()
-            for eventId, start, end in oldRoom[1]:
+            for eventId, start, end in oldRoomReservations:
                 print(eventId, start, end)
                 if eventId == event.getId():
                     eventTuple = (eventId, start, end)
@@ -217,24 +236,24 @@ class Organization:
                     # If event is not weekly
                     if event.getWeekly() is None:
                         # Removing event from old room
-                        oldRoom[1].remove((eventId, starttime, endtime))
+                        oldRoomReservations.remove((eventId, starttime, endtime))
                         # Adding event to new room
-                        self.roomList[room.getId()][1].append(
+                        self.getEventsReservedRoom(room.getId()).append(
                             (eventId, starttime, endtime)
                         )
                     # If event is weekly
                     else:
                         while starttime < event.getWeekly():
                             # Removing event from old room
-                            oldRoom[1].remove((eventId, starttime, endtime))
+                            oldRoomReservations.remove((eventId, starttime, endtime))
                             # Adding event to new room
-                            self.roomList[room.getId()][1].append(
+                            self.getEventsReservedRoom[room.getId()].append(
                                 (eventId, starttime, endtime)
                             )
                             starttime += timedelta(days=7)
                             endtime += timedelta(days=7)
                     # Updating event room
-                    self.eventList[event.getId()][1] = room.getId()
+                    self.getRoomReservedByEvent[event.getId()]  = room.getId()
 
     # Needs to be changed
     def query(self, title, category, rect=None, room=None):

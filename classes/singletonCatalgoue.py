@@ -8,19 +8,30 @@ class Singleton(object):
 class Catalogue(Singleton):
     
     def __init__(self):
-        self.objectList = {}
+        self.userList = {}
+        self.organizationList = {}
         if not hasattr(self,'objectCount'):
             self.objectCount = 0
 
     def getCount(self):
         return self.objectCount
     
-    def getObjectList(self):
-        return self.objectList
+    def getUserList(self):
+        return self.userList
     
-    def add(self,object):
-        self.objectList[object.getId()] = object
+    def getOrganizationList(self):
+        return self.organizationList
+    
+    def addUser(self,user):
+        self.userList[user.getId()] = user
         self.objectCount += 1
 
-    def get(self,id):
-        return self.objectList[id]
+    def addOrganization(self,organization):
+        self.organizationList[organization.getId()] = organization
+        self.objectCount += 1    
+
+    def getUser(self,id):
+        return self.userList[id]
+    
+    def getOrganization(self,id):
+        return self.organizationList[id]
