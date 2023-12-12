@@ -37,6 +37,8 @@ class User:
     def get_attachedOrganization(self):
         return self.attachedOrganization
 
+    def update_userId(self, id):
+        self.id = id
     def update_username(self, username):
         self.username = username
 

@@ -36,7 +36,7 @@ class Client:
             except json.JSONDecodeError:
                 request_type = request.split(" ")[0]
 
-            if request_type == "CREATE_USER" or request_type == "0":
+            if request_type == "CREATE_USER":
                 if not is_json:
                     params = request.split(" ")
                     username = params[1]
@@ -59,7 +59,7 @@ class Client:
                 ):  # Server returned id of created user which means user creation is successful.
                     print(f"User({username}) created successfully.")
 
-            elif request_type == "LOGIN" or request_type == "1":
+            elif request_type == "LOGIN":
                 if not is_json:
                     params = request.split(" ")
                     username = params[1]
@@ -166,15 +166,25 @@ class Client:
                 self.request_sock.send(str.encode(json.dumps(request)))
                 print(self.request_sock.recv(1024).decode("utf8"))
 
-            elif request_type == "DELETE_RESERVATIONS":
+            elif request_type == "DELETE_RESERVATION":
                 if not is_json:
                     params = request.split(" ")
                     request = {
                         "command": "DELETE_RESERVATIONS",
                         "room_id": params[1],
+                        "event_id": params[2],
                     }
                 self.request_sock.send(str.encode(json.dumps(request)))
                 print(self.request_sock.recv(1024).decode("utf8"))
+            elif request_type == "READ_EVENT":
+                if not is_json:
+                    params = request.split(" ")
+                    request = {
+                        "command": "READ_EVENT",
+                        "event_id": params[1],
+                    }
+                self.request_sock.send(str.encode(json.dumps(request)))
+                print(self.request_sock.recv(1024).decode("utf8"))    
             elif request_type == "UPDATE_EVENT":
                 if not is_json:
                     params = request.split(" ")

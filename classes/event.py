@@ -13,6 +13,7 @@ class Event:
         self.capacity = capacity
         self.duration = duration
         self.weekly = weekly
+        #Permissions is dict that maps the users to events CRUD operations {user_id: [PermissionList]}
         self.permissions = permissions
 
     # Delete
@@ -43,6 +44,9 @@ class Event:
 
     def getPermissions(self):
         return self.permissions
+    
+    def getUserPermissions(self, user_id):
+        return self.permissions[user_id]
 
     # Update
     def updateEvent(
@@ -55,6 +59,12 @@ class Event:
         self.duration = duration
         self.weekly = weekly
         self.permissions = permissions
+
+    def updatePermissions(self, permissions):
+        self.permissions = permissions
+    
+    def updateUserPermissions(self, user_id, permissions):
+        self.permissions[user_id] = permissions
 
     def __str__(self):
         return f"Event title: {self.title} Event description: {self.description} Event category: {self.category} Event capacity: {self.capacity} Event duration: {self.duration} Event weekly:{self.weekly}"

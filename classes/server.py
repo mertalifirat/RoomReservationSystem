@@ -26,6 +26,7 @@ class Server:
         try:
             self.organization_and_user_list = pickle.load(open("organizations.p","rb"))
             print(self.organization_and_user_list.getOrganizationList().keys())
+            print(self.organization_and_user_list.getUserList().keys())
         except FileNotFoundError as err:
             print("error:" + str(err))
                
@@ -128,11 +129,13 @@ class RequestHandler(Thread):
                     if encoded_password == row[1]:
                         print("Login successful")
                         client_user_id = uuid.UUID(row[0])
+                        print(client_user_id)
                         self.conn.send("Login successful".encode("utf8"))
                     else:
                         print("Login failed")
                         self.conn.send("Login failed".encode("utf8"))
 
+            #Organization operations
             elif request_type ==  "LIST_OBJECT": #List organizations
                 with Server.mutex:
                     result = ""
@@ -160,8 +163,12 @@ class RequestHandler(Thread):
                         if organization_id is None:
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
-                            org = Server.organization_and_user_list.get(organization_id)
-                            self.conn.send(str.encode(org.listRooms()))
+                            org = Server.organization_and_user_list.getOrganization(organization_id)
+                            #Check if user has permission to list rooms
+                            if "LIST" in org.getUserPermissions(client_user_id):
+                                self.conn.send(str.encode(org.listRooms()))
+                            else:
+                                self.conn.send("You don't have access for listing the rooms".encode("utf8"))    
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))
 
@@ -172,10 +179,14 @@ class RequestHandler(Thread):
                         if organization_id is None:
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
-                            org = Server.organization_and_user_list.get(organization_id)
-                            room = Room(request["room_name"],request["x"],request["y"],request["capacity"],request["working_hours"],request["permissions"])
-                            org.addRoom(room)
-                            self.conn.send(str.encode("Room added"))
+                            org = Server.organization_and_user_list.getOrganization(organization_id)
+                            #Check if user has permission to add rooms
+                            if "ADD" in org.getUserPermissions(client_user_id):
+                                room = Room(request["room_name"],request["x"],request["y"],request["capacity"],request["working_hours"],request["permissions"])
+                                org.addRoom(room)
+                                self.conn.send(str.encode("Room added"))
+                            else:
+                                self.conn.send("You don't have access for adding rooms".encode("utf8"))    
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))
 
@@ -186,11 +197,15 @@ class RequestHandler(Thread):
                         if organization_id is None:
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
-                            org = Server.organization_and_user_list.get(organization_id)
-                            self.conn.send(str.encode(org.accessRoomsandEvents()))
+                            org = Server.organization_and_user_list.getOrganization(organization_id)
+                            if "ACCESS" in org.getUserPermissions(client_user_id):
+                                self.conn.send(str.encode(org.accessRoomsandEvents()))
+                            else:
+                                self.conn.send("You don't have access for accessing rooms and events".encode("utf8"))
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))
 
+            #Room operations
             elif request_type == "DELETE_ROOM": #Deleting room
                 with Server.mutex:
                     if client_user_id is not None:
@@ -198,13 +213,18 @@ class RequestHandler(Thread):
                         if organization_id is None:
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
-                            org = Server.organization_and_user_list.get(organization_id)
-                            #deleting events in room
-                            for eventId,_,_ in org.getRoom(request["room_id"])[1]:
-                                org.deleteEvent(eventId)
-                            #deleting the room    
-                            org.deleteRoom(request["room_id"])
-                            self.conn.send(str.encode("Room deleted"))
+                            org = Server.organization_and_user_list.getOrganization(organization_id)
+                            #Check if user has permission to delete room TODO: check if the user is owner of the organization
+                            room = org.getRoom(request["room_id"])
+                            if "DELETE" in room.getUserPermissions(client_user_id):
+                                #deleting events in room
+                                for eventId,_,_ in org.getEventsReservedRoom(request["room_id"]):
+                                    org.deleteEvent(eventId)
+                                #deleting the room    
+                                org.deleteRoom(request["room_id"])
+                                self.conn.send(str.encode("Room deleted"))
+                            else:
+                                self.conn.send("You don't have access for deleting the room".encode("utf8"))    
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))
 
@@ -216,10 +236,15 @@ class RequestHandler(Thread):
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
                             result = ""
-                            org = Server.organization_and_user_list.get(organization_id)
-                            for eventId,start,end in org.getRoom(request["room_id"])[1]:
-                                result += f"Event name: {org.getEvent(eventId)[0].getTitle()} Start: {start} End: {end}\n"
-                            self.conn.send(str.encode(result))
+                            org = Server.organization_and_user_list.getOrganization(organization_id)
+                            #Check if user has permission to list reserved events
+                            room = org.getRoom(request["room_id"])
+                            if "LIST" in room.getUserPermissions(client_user_id):
+                                for eventId,start,end in org.getEventsReservedRoom(request["room_id"]):
+                                    result += f"Event name: {org.getEvent(eventId).getTitle()} Start: {start} End: {end}\n"
+                                self.conn.send(str.encode(result))
+                            else:
+                                self.conn.send("You don't have access for listing the reserved events".encode("utf8"))    
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))
 
@@ -230,39 +255,65 @@ class RequestHandler(Thread):
                         if organization_id is None:
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
-                            org = Server.organization_and_user_list.get(organization_id)
-                            org.reserveRoom(org.getRoom(request["room_id"])[0],org.getEvent(request["event_id"])[0],request["start"],request["end"])
-                            self.conn.send(str.encode("Room reserved"))
+                            org = Server.organization_and_user_list.getOrganization(organization_id)
+                            room = org.getRoom(request["room_id"])
+                            #Check if user has permission to reserve room TODO:check for PERRESERVE permission
+                            if "RESERVE" in room.getUserPermissions(client_user_id):
+                                org.reserveRoom(room,org.getEvent(request["event_id"]),request["start"],request["end"])
+                                self.conn.send(str.encode("Room reserved"))
+                            else:
+                                self.conn.send("You don't have access for reserving the room".encode("utf8"))    
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))
 
-            elif request_type == "DELETE_RESERVATIONS": #Delete reservations in given room
+            elif request_type == "DELETE_RESERVATION": #Delete reservation in given room
                 with Server.mutex:
                     if client_user_id is not None:
                         organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
                         if organization_id is None:
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
-                            org = Server.organization_and_user_list.get(organization_id)
-                            for eventId,start,end in org.getRoom(request["room_id"])[1]:
-                                org.getEvent(eventId)[1] = None
-                                org.getRoom(request["room_id"])[1].remove((eventId,start,end))
-                            self.conn.send(str.encode("Reservations deleted"))
+                            org = Server.organization_and_user_list.getOrganization(organization_id)
+                            room = org.getRoom(request["room_id"])
+                            event = org.getEvent(request["event_id"])
+                            #Check if user has permission to delete reservation and write to event TODO: check for org owner
+                            if "DELETE" in room.getUserPermissions(client_user_id) and "WRITE" in event.getUserPermissions(client_user_id):
+                                roomEventList = org.getEventsReservedRoom(request["room_id"])
+                                roomEventList.remove((request["event_id"],request["start"],request["end"]))
+                                self.conn.send(str.encode("Reservation deleted"))
+                            else:
+                                self.conn.send("You don't have access for deleting the reservation".encode("utf8"))    
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))
-
-            elif request_type == "READ_EVENTS":
+            #Event operations
+            elif request_type == "READ_EVENT":
                 with Server.mutex:
                     if client_user_id is not None:
                         organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
-                        result = ""
                         if organization_id is None:
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
-                            org = Server.organization_and_user_list.get(organization_id)
-                            self.conn.send(str.encode(org.listEvents()))
+                            org = Server.organization_and_user_list.getOrganization(organization_id)
+                            event = org.getEvent(request["event_id"])
+                            eventRoomId = org.getRoomReservedByEvent(request["event_id"])
+                            if eventRoomId is not None:
+                                eventRoom = org.getRoom(eventRoomId)
+                            #Check if event is reserved
+                            if eventRoomId is None:
+                                #Check if user has permission to read event
+                                if "READ" in event.getUserPermissions(client_user_id):
+                                    self.conn.send(f"Event name: {event.getTitle()} Event Description: {event.getDescription()} Event Category: {event.getCategory()} Event Capacity: {event.getCapacity()}\n".encode())
+                                else:
+                                    self.conn.send("You don't have access for reading the event".encode("utf8"))
+                            else:
+                                #Check if user has permission to read event
+                                if "READ" in event.getUserPermissions(client_user_id):
+                                    self.conn.send(f"Event name: {event.getTitle()} Start: {event.getS} End: {end}\n".encode())
+                                else:
+                                    self.conn.send(f"{eventRoom.getName()} is busy".encode("utf8"))                     
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))
+
             elif request_type == "UPDATE_EVENT":
                 with Server.mutex:
                     if client_user_id is not None:
@@ -271,9 +322,14 @@ class RequestHandler(Thread):
                         if organization_id is None:
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
-                            org = Server.organization_and_user_list.get(organization_id)
-                            org.updateEvent(request["title"],request["description"],request["category"],request["capacity"],request["duration"],request["weekly"],request["permissions"])
-                            self.conn.send(str.encode("Event updated"))
+                            org = Server.organization_and_user_list.getOrganization(organization_id)
+                            event = org.getEvent(request["event_id"])
+                            #Check if user has permission to update event
+                            if "WRITE" in event.getUserPermissions(client_user_id):
+                                org.updateEvent(request["title"],request["description"],request["category"],request["capacity"],request["duration"],request["weekly"],request["permissions"])
+                                self.conn.send(str.encode("Event updated"))
+                            else:
+                                self.conn.send("You don't have access for updating the event".encode("utf8"))    
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))
             elif request_type == "DELETE_EVENT":
@@ -284,9 +340,23 @@ class RequestHandler(Thread):
                         if organization_id is None:
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
-                            org = Server.organization_and_user_list.get(organization_id)
-                            org.deleteEvent(request["event_id"])
-                            self.conn.send(str.encode("Event deleted"))
+                            org = Server.organization_and_user_list.getOrganization(organization_id)
+                            event = org.getEvent(request["event_id"])
+                            eventRoomId = org.getRoomReservedByEvent(request["event_id"])
+                            if eventRoomId is not None:
+                                eventRoom = org.getRoom(eventRoomId)
+                            if eventRoomId is None:
+                                if "WRITE" in event.getUserPermissions(client_user_id):
+                                    org.deleteEvent(request["event_id"])
+                                    self.conn.send(str.encode("Event deleted"))    
+                                else:
+                                    self.conn.send("You don't have access for deleting the event".encode("utf8"))
+                            else:
+                                if "WRITE" in event.getUserPermissions(client_user_id) and "DELETE" in eventRoom.getUserPermissions(client_user_id):
+                                    org.deleteEvent(request["event_id"])
+                                    self.conn.send(str.encode("Event deleted"))
+                                else:
+                                    self.conn.send("You don't have access for deleting the event".encode("utf8"))        
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))                        
             elif request_type == "LOGOUT": #Logout

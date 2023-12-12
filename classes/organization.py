@@ -16,6 +16,7 @@ class Organization:
         self.map = map
         self.roomList = OrderedDict()
         self.eventList = OrderedDict()
+        #Permissions is dict that maps the users to room CRUD operations {user_id: [PermissionList]}
         self.permissions = permissions
         #Adding created organization to the org_list
         #Catalogue.add(self)
@@ -30,7 +31,7 @@ class Organization:
         return result
     
     def getOrganizationInfo(self):
-        result = f"Organization id: {self.id} \n Organization name: {self.name} \n Organization owner: {self.owner} \n Organization map: {self.map}\n"
+        result = f"Organization id: {self.id} \n Organization name: {self.name} \n Organization owner: {self.owner} \n"
         return result
  
     def listObjects(self):
@@ -101,12 +102,19 @@ class Organization:
 
     def getEvent(self, id):
         return self.eventList.get(id)[0]
+    
     def getEventsReservedRoom(self, id):
         return self.roomList.get(id)[1]
 
     def getRoomReservedByEvent(self, id):
         return self.eventList.get(id)[1]
 
+    def getPermissions(self):
+        return self.permissions
+    
+    def getUserPermissions(self, user_id):
+        return self.permissions.get(user_id)
+    
     # Update
     def updateOrganization(self, owner, name, map):
         self.owner = owner
@@ -132,12 +140,19 @@ class Organization:
         event = self.getEvent(id)
         event.updateEvent(title, description, category, capacity, duration, weekly)
 
+    def updatePermissions(self, permissions):
+        self.permissions = permissions
+    
+    def updateUserPermissions(self, user_id, permissions):
+        self.permissions[user_id] = permissions    
     # Delete
     def deleteEvent(self, id):
-        del self.eventList.pop(id)
+        event = self.eventList.pop(id)
+        del event
 
     def deleteRoom(self, id):
-        del self.roomList.pop(id)
+        room = self.roomList.pop(id)
+        del room
 
     # Check if the room is available between given dates, for that we are getting hour and minute from eventStart and eventEnd
     def isRoomAvailableBetweenHours(self, room, eventStartDateTime, eventEndDateTime):

@@ -1,8 +1,10 @@
 import cmd
 from classes import *
 from datetime import time
+import uuid
 import datetime
 from classes.room import Room
+from classes.user import User
 from classes.event import Event
 from classes.organization import Organization
 from classes.view import View
@@ -20,7 +22,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         0,
         30,
         (time(8, 0), time(18, 0)),
-        ["admin", "user"],
+        {uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"):["LIST","RESERVE","DELETE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]},
     )
     room2 = Room(
         "Room 2",
@@ -28,7 +30,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         0,
         20,
         (time(8, 0), time(18, 0)),
-        ["admin", "user"],
+        {uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"):["LIST","RESERVE","DELETE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]},
     )
     room3 = Room(
         "Room 3",
@@ -36,7 +38,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         1,
         30,
         (time(8, 0), time(18, 0)),
-        ["admin", "user"],
+        {uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"):["LIST","RESERVE","DELETE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]},
     )
     room4 = Room(
         "Room 4",
@@ -44,7 +46,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         1,
         40,
         (time(8, 0), time(18, 0)),
-        ["admin", "user"],
+        {uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"):["LIST","RESERVE","DELETE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]},
     )
 
     event1 = Event(
@@ -55,7 +57,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         60,
         None,
         # datetime(2022,2,1),
-        ["admin", "user"],
+        {uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"):["READ","WRITE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["READ"]},
     )
     event2 = Event(
         "Event 2",
@@ -64,7 +66,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         20,
         70,
         None,
-        ["admin", "user"],
+        {uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"):["READ","WRITE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["READ"]},
     )
     event3 = Event(
         "Event 3",
@@ -73,15 +75,15 @@ class RoomReservationSystemDemo(cmd.Cmd):
         30,
         60,
         None,
-        ["admin", "user"],
+        {uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"):["READ","WRITE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["READ"]},
     )
 
     map = [[None for _ in range(3)] for _ in range(3)]
 
     organization = Organization(
-        "Doruk", "Organization 1", map ,{"admin" : ["LIST"], "user" : ["ACCESS"]}
+        "Doruk", "Organization 1", map ,{uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc") : ["LIST","ADD","ACCESS"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748") : ["ACCESS"]}
     )  # Create a 2D array with None values
-
+    
     eventList = [event1, event2, event3]
     organization.addRoom(room1)
     organization.addRoom(room2)
@@ -92,12 +94,19 @@ class RoomReservationSystemDemo(cmd.Cmd):
     organization.addEvent(event2)
     organization.addEvent(event3)
 
+    user1 = User("admin","admin@localhost","Admin","admin1234")
+    user2 = User("user","user@localhost","User","user1234")
+    user1.update_userId(uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"))
+    user2.update_userId(uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"))
     catalogue = Catalogue()
-    catalogue.add(organization)
+    catalogue.addOrganization(organization)
+    catalogue.addUser(user1)
+    catalogue.addUser(user2)
     view = View("Doruk")
     def __del__(self):
         print("Server shutdown, file saved")
-        print(self.catalogue.getObjectList())
+        print(self.catalogue.getOrganizationList())
+        print(self.catalogue.getUserList())
         pickle.dump(self.catalogue,open("organizations.p","wb"))
 
     def do_add_room(self, arg):

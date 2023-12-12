@@ -12,6 +12,7 @@ class Room:
         self.y = y
         self.capacity = capacity
         self.working_hours = working_hours
+        #Permissions is dict that maps the users to room CRUD operations {user_id: [PermissionList]}
         self.permissions = permissions
         
 
@@ -40,6 +41,9 @@ class Room:
 
     def getPermissions(self):
         return self.permissions
+    
+    def getUserPermissions(self, user_id):
+        return self.permissions[user_id]
 
     # Update
     def updateRoom(self, name, x, y, capacity, working_hours, permissions):
@@ -49,6 +53,12 @@ class Room:
         self.capacity = capacity
         self.working_hours = working_hours
         self.permissions = permissions
+
+    def updatePermissions(self, permissions):
+        self.permissions = permissions
+    
+    def updateUserPermissions(self, user_id, permissions):
+        self.permissions[user_id] = permissions    
 
     def __str__(self):
         return f"Room name: {self.name} Room coord x: {self.x} Room coord y: {self.y} Room capacity: {self.capacity} Room working hours: {self.working_hours}"
