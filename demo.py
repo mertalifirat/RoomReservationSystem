@@ -12,6 +12,7 @@ from datetime import datetime
 import pickle
 from classes.singletonCatalgoue import Catalogue
 
+#{uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"):["LIST","RESERVE","DELETE"],uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]}
 class RoomReservationSystemDemo(cmd.Cmd):
     intro = "Welcome to the Demo of the Room Reservation System. Type help or ? to list commands.\n"
     # simple data
@@ -83,6 +84,14 @@ class RoomReservationSystemDemo(cmd.Cmd):
     organization = Organization(
         "Doruk", "Organization 1", map ,{uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc") : ["LIST","ADD","ACCESS"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748") : ["ACCESS"]}
     )  # Create a 2D array with None values
+
+    organization2 = Organization(
+        "Mert", "Organization 2", map ,{uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc") : ["LIST","ADD","ACCESS"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748") : ["ACCESS"]}
+    )  # Create a 2D array with None values
+
+    organization3 = Organization(
+        "Ece", "Organization 3", map ,{uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc") : ["LIST","ADD","ACCESS"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748") : ["ACCESS"]}
+    )  # Create a 2D array with None values
     
     eventList = [event1, event2, event3]
     organization.addRoom(room1)
@@ -100,6 +109,8 @@ class RoomReservationSystemDemo(cmd.Cmd):
     user2.update_userId(uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"))
     catalogue = Catalogue()
     catalogue.addOrganization(organization)
+    catalogue.addOrganization(organization2)
+    catalogue.addOrganization(organization3)
     catalogue.addUser(user1)
     catalogue.addUser(user2)
     view = View("Doruk")

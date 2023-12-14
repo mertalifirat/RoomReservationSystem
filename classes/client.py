@@ -71,7 +71,7 @@ class Client:
                     }
 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))
+                print(self.request_sock.recv(4096).decode("utf8"))
                 # if (
                 #     user_id >= 0
                 # ):  # Server returned id of logged in user which means user login is successful.
@@ -81,14 +81,14 @@ class Client:
                 #         target=self.notification, args=(user_id,)
                 #     )  # msh[0] is user_id
                 #     notification_thread.start()
-            elif request_type == "LIST_OBJECT":
+            elif request_type == "LIST_ORGANIZATIONS":
                 if not is_json:
                     params = request.split(" ")
                     request = {
-                        "command": "LIST_OBJECT",
+                        "command": "LIST_ORGANIZATIONS",
                     }
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))
+                print(self.request_sock.recv(4096).decode("utf8"))
 
             elif request_type == "ATTACH_ORGANIZATION":
                 if not is_json:
@@ -98,31 +98,40 @@ class Client:
                         "organization_id": params[1],
                     }
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))
+                print(self.request_sock.recv(4096).decode("utf8"))
 
-            elif request_type == "LIST_ROOM": #List rooms in attached organization
+            elif request_type == "DETACH_ORGANIZATION":
                 if not is_json:
                     params = request.split(" ")
                     request = {
-                        "command": "LIST_ROOM",
+                        "command": "DETACH_ORGANIZATION",
                     }
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))
+                print(self.request_sock.recv(4096).decode("utf8"))    
 
-            elif request_type == "ADD_ROOM":
+            elif request_type == "LIST_ROOMS": #List rooms in attached organization
+                if not is_json:
+                    params = request.split(" ")
+                    request = {
+                        "command": "LIST_ROOMS",
+                    }
+                self.request_sock.send(str.encode(json.dumps(request)))
+                print(self.request_sock.recv(4096).decode("utf8"))
+
+            elif request_type == "ADD_ROOM": #Working hours are in format: %H:%M-%H:%M
                 if not is_json:
                     params = request.split(" ")
                     request = {
                         "command": "ADD_ROOM",
                         "room_name": params[1],
-                        "room_x": params[2],
-                        "room_y": params[3],
+                        "x": params[2],
+                        "y": params[3],
                         "capacity": params[4],
                         "working_hours": params[5],
                         "permissions": params[6],
                     }
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))
+                print(self.request_sock.recv(4096).decode("utf8"))
 
             elif request_type == "ACCESS":
                 if not is_json:
@@ -131,7 +140,7 @@ class Client:
                         "command": "ACCESS",
                     }
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))
+                print(self.request_sock.recv(4096).decode("utf8"))
 
             elif request_type == "DELETE_ROOM":
                 if not is_json:
@@ -151,9 +160,9 @@ class Client:
                         "room_id": params[1],
                     }
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))
+                print(self.request_sock.recv(4096).decode("utf8"))
 
-            elif request_type == "RESERVE":
+            elif request_type == "RESERVE": #Start format is: %Y-%m-%d-%H:%M
                 if not is_json:
                     params = request.split(" ")
                     request = {
@@ -161,18 +170,19 @@ class Client:
                         "room_id": params[1],
                         "event_id": params[2],
                         "start": params[3],
-                        "end": params[4],
                     }
                 self.request_sock.send(str.encode(json.dumps(request)))
                 print(self.request_sock.recv(1024).decode("utf8"))
 
-            elif request_type == "DELETE_RESERVATION":
+            elif request_type == "DELETE_RESERVATION": #Start and end are in format: %Y-%m-%d-%H:%M
                 if not is_json:
                     params = request.split(" ")
                     request = {
-                        "command": "DELETE_RESERVATIONS",
+                        "command": "DELETE_RESERVATION",
                         "room_id": params[1],
                         "event_id": params[2],
+                        "start": params[3],
+                        "end": params[4],
                     }
                 self.request_sock.send(str.encode(json.dumps(request)))
                 print(self.request_sock.recv(1024).decode("utf8"))
@@ -184,19 +194,20 @@ class Client:
                         "event_id": params[1],
                     }
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))    
+                print(self.request_sock.recv(4096).decode("utf8"))    
             elif request_type == "UPDATE_EVENT":
                 if not is_json:
                     params = request.split(" ")
                     request = {
                         "command": "UPDATE_EVENT",
-                        "title": params[1],
-                        "description": params[2],
-                        "category": params[3],
-                        "capacity": params[4],
-                        "duration": params[5],
-                        "weekly": params[6],
-                        "permissions": params[7],
+                        "event_id": params[1],
+                        "title": params[2],
+                        "description": params[3],
+                        "category": params[4],
+                        "capacity": params[5],
+                        "duration": params[6],
+                        "weekly": params[7],
+                        "permissions": params[8],
                     }
                 self.request_sock.send(str.encode(json.dumps(request)))
                 print(self.request_sock.recv(1024).decode("utf8"))
@@ -227,7 +238,8 @@ class Client:
                 self.request_sock.send(str.encode(json.dumps(request)))
                 print(self.request_sock.recv(1024).decode("utf8"))
                 self.server_shut_down = True            
-
+            else:
+                print("Invalid command")
 
 if __name__ == "__main__":
     client = Client()

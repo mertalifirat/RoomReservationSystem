@@ -31,7 +31,7 @@ class Organization:
         return result
     
     def getOrganizationInfo(self):
-        result = f"Organization id: {self.id} \n Organization name: {self.name} \n Organization owner: {self.owner} \n"
+        result = f" Organization id: {self.id} \n Organization name: {self.name} \n Organization owner: {self.owner} \n \n"
         return result
  
     def listObjects(self):
@@ -108,7 +108,7 @@ class Organization:
 
     def getRoomReservedByEvent(self, id):
         return self.eventList.get(id)[1]
-
+    
     def getPermissions(self):
         return self.permissions
     
@@ -136,15 +136,21 @@ class Organization:
         room.updateRoom(name, x, y, capacity, working_hours, permissions)
         self.map[room.getX()][room.getY()] = room
 
-    def updateEvent(self, id, title, description, category, capacity, duration, weekly):
+    def updateEvent(self, id, title, description, category, capacity, duration, weekly,permissions):
         event = self.getEvent(id)
-        event.updateEvent(title, description, category, capacity, duration, weekly)
+        event.updateEvent(title, description, category, capacity, duration, weekly,permissions)
 
     def updatePermissions(self, permissions):
         self.permissions = permissions
     
     def updateUserPermissions(self, user_id, permissions):
-        self.permissions[user_id] = permissions    
+        self.permissions[user_id] = permissions
+
+    def updateRoomReservedByEvent(self, id, room_id):
+        if room_id is None:
+            self.eventList.get(id)[1] = None
+        else:
+            self.eventList.get(id)[1] = room_id        
     # Delete
     def deleteEvent(self, id):
         event = self.eventList.pop(id)
@@ -187,16 +193,16 @@ class Organization:
             if room.getCapacity() >= event.getCapacity():
                 # Check if event is weekly or not
                 if event.getWeekly() is None:
-                    self.getEventsReservedRoom[room.getId()].append((event.getId(), start, end))
-                    self.getRoomReservedByEvent[event.getId()] = room.getId()
+                    self.getEventsReservedRoom(room.getId()).append((event.getId(), start, end))
+                    self.updateRoomReservedByEvent(event.getId(), room.getId())
                 # If event is weekly add event to the room reservation list for every week
                 # TODO: Check if room has PERWRITE permission
                 else:
+                    self.updateRoomReservedByEvent(event.getId(), room.getId())
                     while start < event.getWeekly():
                         self.getEventsReservedRoom(room.getId()).append(
                             (event.getId(), start, end)
                         )
-                        self.getRoomReservedByEvent[event.getId()]  = room.getId()
                         start += timedelta(days=7)
                         end += timedelta(days=7)
 

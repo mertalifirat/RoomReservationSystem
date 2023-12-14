@@ -67,7 +67,7 @@ class Event:
         self.permissions[user_id] = permissions
 
     def __str__(self):
-        return f"Event title: {self.title} Event description: {self.description} Event category: {self.category} Event capacity: {self.capacity} Event duration: {self.duration} Event weekly:{self.weekly}"
+        return f"Event Id: {self.id} Event title: {self.title} Event description: {self.description} Event category: {self.category} Event capacity: {self.capacity} Event duration: {self.duration} Event weekly:{self.weekly}"
 
     def __repr__(self):
-        return f"Event(Title:'{self.title}',Description: {self.description},Category: {self.category},Capacity: {self.capacity},Duration: {self.duration},Weekly: {self.weekly},Permissions: {self.permissions})"
+        return f"Event(Id: \'{self.id}\',Title:'{self.title}',Description: {self.description},Category: {self.category},Capacity: {self.capacity},Duration: {self.duration},Weekly: {self.weekly},Permissions: {self.permissions})"
