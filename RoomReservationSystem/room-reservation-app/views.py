@@ -22,11 +22,35 @@ class Login(View):
             user = form.get_user()
             login(request, user)
             print("user  logged in")
-            return redirect('shared_photo_library:home')
+            return redirect('room-reservation-app:home')
         return render(request, 'templates/login-page.html', {'form': form, 'user_authenticated': False})
 
 
 class Logout(LoginRequiredMixin, View):
     def get(self, request):
         logout(request)
-        return redirect('shared_photo_library:home')
+        return redirect('room-reservation-app:home')
+
+class SignUp(View):
+    def get(self, request):
+        form = UserCreationForm()
+        return render(request, 'signup.html', {'form': form})
+
+    def post(self, request):
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('room-reservation-app:login')
+        return render(request, 'signup.html', {'form': form})
+
+
+
+class Home(View):
+    def get(self, request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        form = AuthenticationForm()
+        
+
+        return render(request, 'homepage.html', {'form': form,
+                                                 'user_authenticated': user_authenticated,})

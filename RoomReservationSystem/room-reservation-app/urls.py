@@ -22,9 +22,10 @@ app_name = 'room-reservation-app'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('', Home.as_view(), name="home"),
+    path('home', Home.as_view(), name="home"),
     path('login', Login.as_view(), name="login"),
     path('logout', Logout.as_view(), name="logout"),
+    path('sign-up', SignUp.as_view(), name="signup"),
     # path('sign-up', SignUp.as_view(), name="signup"),
     # path('upload-photo', UploadPhoto.as_view(), name="upload_photo"),
     # path('photo', PhotoView.as_view(), name="update_photo"),

@@ -18,86 +18,18 @@
                 <br><br><br>
                 <div class="container">
                     {% if user_authenticated %}
-                        <!-- {% if organizations %}
-                            <div style="margin-bottom: 25px" class="row">
-                                <h3 style="font-size: 32px; margin-bottom: 8px"><a href="{% url 'room-reservation-app:organizations' %}">Photos</a></h3>
-                                {% for org in organizations %}
-
-                                    <div class="col-md-3">
-                                        <div class="flip-card">
-                                      <div class="flip-card-inner">
-                                        <div class="flip-card-front">
-                                          <img class="cover" src="{{ photo.photo.url }}" alt="Avatar" style="height:300px; width:300px;">
-                                        </div>
-                                        <div class="flip-card-back">
-                                          <p style="margin-top:100px">Location: {{ photo.location }}</p>
-                                          <p>Date: {{ photo.date}}</p>
-                                          <p>Tags: {{ photo.tags }} </p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    </div>
-
-                                {% endfor %}
-                            </div>
-                        {% endif %} -->
-
-                        <!-- {% if collections %}
-                            <div class="row">
-                            <h3 style="font-size:32px; margin-bottom: 8px "><a href="{% url 'room-reservation-app:collections' %}">Collections</a></h3>
-                            {% for col in collections %}
-
-                                <div class="col-md-3">
-                                    <div class="flip-card">
-                                  <div class="flip-card-inner">
-                                    <div class="flip-card-front">
-                                      <img class="cover" src="{{ col.cover.url }}" alt="Avatar" style="height:300px; width:300px;">
-                                    </div>
-                                    <div class="flip-card-back">
-                                      <h3 style="margin-top:100px">{{ col.collection_name }}</h3>
-                                      <p> created by <i>{{ col.owner.username}}</i></p>
-                                      <p>{{ col.created_date }} </p>
-                                    </div>
-                                  </div>
-                                </div>
-                                </div>
-
-                            {% endfor %}
-
-                        </div>
-                        {% endif %}
-
-                        {% if views %}
-                            <div class="row">
-                            <h3 style="font-size:32px; margin-bottom: 8px "><a href="{% url 'room-reservation-app:views' %}">Views</a></h3>
-                            {% for view in views %}
-
-                                <div class="col-md-3">
-                                    <div class="flip-card">
-                                  <div class="flip-card-inner">
-                                    <div class="flip-card-front">
-                                      <img class="cover" src="{{ view.cover.url }}" alt="Avatar" style="height:300px; width:300px;">
-                                    </div>
-                                    <div class="flip-card-back">
-                                      <h3 style="margin-top:100px">{{ view.view_name }}</h3>
-                                      <p> created by <i>{{ view.owner.username}}</i></p>
-                                      <p>{{ view.created_date }} </p>
-                                    </div>
-                                  </div>
-                                </div>
-                                </div>
-
-                            {% endfor %}
-                        </div>
-                        {% endif %} -->
+                      <h1 style="font-size: 32px; margin-bottom: 8px">Welcome, {{ user.username }}</h1>
 
 
                     {% else %}
-                        <form action="{% url 'room-reservation-app:login' %}" class="login" method="post" >
+                      <form action="{% url 'room-reservation-app:login' %}" class="login" method="post" >
                         {% csrf_token %}
                         {{ form|crispy }}
+                        <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Login</Button>
+                        <br>
+                        <small style="margin-top: 5px">Don't have an account? <a href=""><i class="fas fa-user-plus"></i></a> </small>
                         
-                    </form>
+                      </form>
                     {% endif %}
 
 
