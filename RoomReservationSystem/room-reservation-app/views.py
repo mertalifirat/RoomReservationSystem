@@ -7,14 +7,14 @@ from django.views import View
 from django.http import Http404, HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import *
-from templates import *
 
+import os
 class Login(View):
     def get(self, request):
 
         form = AuthenticationForm()
         
-        return render(request, 'templates/login-page.html', {'form': form})
+        return render(request, 'homepage.html', {'form': form})
 
     def post(self, request):
         form = AuthenticationForm(data=request.POST)
