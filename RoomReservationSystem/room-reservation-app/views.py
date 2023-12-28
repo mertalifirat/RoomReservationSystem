@@ -1,3 +1,5 @@
+import json
+from django import forms
 from django.shortcuts import render
 from django.db.models import Count, Q
 from django.shortcuts import render, redirect
@@ -6,14 +8,21 @@ from django.contrib.auth import login, logout
 from django.views import View
 from django.http import Http404, HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
+import pdb
+from .classes.client import Client
 from .models import *
+from rest_framework.authtoken.models import Token
+import socket
+from . import constants
 
 import os
+from .forms import UserForm
+        
 class Login(View):
     def get(self, request):
 
         form = AuthenticationForm()
-        
+        print(request.user)
         return render(request, 'homepage.html', {'form': form})
 
     def post(self, request):
@@ -21,8 +30,29 @@ class Login(View):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            print("user  logged in")
-            return redirect('room-reservation-app:home')
+            print("user logged in")
+            user_id = request.user.id
+            
+            #Connect to phase2 server
+            self.request_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.request_sock.connect((constants.address, constants.request_port))
+            #Create request
+            request = {
+                "command": "LOGIN",
+                "username": user.username,
+                "password": user.password,
+                "django_id": user_id,
+            }
+            #Send request to phase2 server
+            self.request_sock.send(str.encode(json.dumps(request)))
+            print(self.request_sock.recv(4096).decode("utf8"))
+            # Generate token
+            token, created = Token.objects.get_or_create(user=user)
+            print(created)
+            response = redirect('room-reservation-app:home')
+            # Set token as a cookie
+            response.set_cookie('auth_token', token.key)
+            return response
         return render(request, 'templates/login-page.html', {'form': form, 'user_authenticated': False})
 
 
@@ -33,13 +63,34 @@ class Logout(LoginRequiredMixin, View):
 
 class SignUp(View):
     def get(self, request):
-        form = UserCreationForm()
+        form = UserForm()
         return render(request, 'signup.html', {'form': form})
 
     def post(self, request):
-        form = UserCreationForm(request.POST)
+        form = UserForm(request.POST)
         if form.is_valid():
-            form.save()
+            # pdb.set_trace()
+            user = form.save(commit=False)
+            #Conneting to the phase2 server
+            password = form.cleaned_data['password1']
+            user.set_password(password)  # Encrypt the password
+            user.save()
+            #pdb.set_trace()
+            #Connection to request server port
+            self.request_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.request_sock.connect((constants.address, constants.request_port))
+            print(form.cleaned_data['username'])
+            request = {
+                "command": "CREATE_USER",
+                "django_id": -1,
+                "username": form.cleaned_data['username'],
+                "email": form.cleaned_data['email'],
+                "fullname": form.cleaned_data['first_name'],
+                "password": user.password,
+            }
+            self.request_sock.send(str.encode(json.dumps(request)))
+            server_response = self.request_sock.recv(4096).decode("utf8")
+            self.request_sock.close()
             return redirect('room-reservation-app:login')
         return render(request, 'signup.html', {'form': form})
 
@@ -54,3 +105,16 @@ class Home(View):
 
         return render(request, 'homepage.html', {'form': form,
                                                  'user_authenticated': user_authenticated,})
+
+class ListOrganizations(LoginRequiredMixin, View):
+    def get(self, request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        form = AuthenticationForm()
+        organizations = Organization.objects.all()
+        return render(request, 'list-organizations.html', {'form': form,
+                                                 'user_authenticated': user_authenticated,
+                                                 'organizations': organizations})
+    def post(self,request):
+        pass
+        

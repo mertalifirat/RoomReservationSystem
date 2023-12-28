@@ -6,7 +6,7 @@ class Database:
         self.conn = conn
         self.curs = curs
         self.curs.execute(
-            "create table if not exists Users(user_id,username, email, fullname, password)"
+            "create table if not exists Users(django_id,user_id,username, email, fullname, password)"
         )
         self.curs.execute(
             "create table if not exists Organizations(organization_id,owner,name,map,room_list,event_list,permissons)"

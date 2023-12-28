@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'crispy_bootstrap4',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [

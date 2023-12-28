@@ -27,7 +27,7 @@
                         {{ form|crispy }}
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Login</Button>
                         <br>
-                        <small style="margin-top: 5px">Don't have an account? <a href=""><i class="fas fa-user-plus"></i></a> </small>
+                        <small style="margin-top: 5px">Don't have an account? <a href="{% url 'room-reservation-app:signup' %}"><i class="fas fa-user-plus"></i></a> </small>
                         
                       </form>
                     {% endif %}

@@ -4,21 +4,21 @@ import sys
 import sqlite3
 import json
 from json import JSONDecodeError
-from .database import Database
-from .room import Room
-from .user import User
+from database import Database
+from room import Room
+from user import User
 import hashlib
 import pickle
 import pdb
 from datetime import datetime
-from .singletonCatalgoue import Catalogue
+from singletonCatalgoue import Catalogue
 import uuid
 
 
 class Server:
     mutex = Lock()
     organization_and_user_list= Catalogue()
-    logged_in_users = {}
+    userList = {}
     def __init__(self, request_port,notification_port):
         self.request_port = request_port
         self.notification_port = notification_port
@@ -92,13 +92,13 @@ class RequestHandler(Thread):
 
             if request_type == "CREATE_USER":  # CREATE_USER
                 with Server.mutex:
-                    encoded_password = hashlib.sha256(request["password"].encode()).hexdigest()
+                   
 
                     user = User(
                         request["username"],
                         request["email"],
                         request["fullname"],
-                        encoded_password,
+                        request["password"],
                     )
                     
                     user_id = str(user.getId())
@@ -108,21 +108,28 @@ class RequestHandler(Thread):
 
                     self.db.insert(
                         "Users",
-                        ("user_id", "username", "email", "fullname", "password"),
+                        ("django_id","user_id", "username", "email", "fullname", "password"),
+                        request["django_id"],
                         user_id,
                         user.get_username(),
                         user.get_email(),
                         user.get_fullname(),
                         user.get_passwd(),
                     )
+                    
                     print("Server: User created successfully.")
                     self.conn.send(str.encode(user.get_fullname()))
 
             elif request_type == "LOGIN": #LOGIN
                 with Server.mutex:
+                    print(request)
                     username = request["username"]
-                    encoded_password = hashlib.sha256(request["password"].encode()).hexdigest()
+                    encoded_password = request["password"]
                     c = self.db.curs
+                    #Settting django_id
+                    c.execute(
+                        f"UPDATE Users SET django_id = '{request['django_id']}' WHERE username = '{username}'"
+                    )
                     row = c.execute(
                         f"SELECT user_id, password FROM Users WHERE username = '{username}'"
                     ).fetchone()
@@ -135,6 +142,7 @@ class RequestHandler(Thread):
                     else:
                         print("Login failed")
                         self.conn.send("Login failed".encode("utf8"))
+
 
             #Organization operations
             elif request_type ==  "LIST_ORGANIZATIONS": #List organizations
@@ -447,4 +455,12 @@ class NotificationHandler(Thread):
             received_msg = self.conn.recv(1024)
               
         #Kill connection    
-        self.conn.close()       
+        self.conn.close()     
+
+if __name__ == "__main__":
+    
+    server = Server(1422,1428)
+
+    server.start_server()
+
+  

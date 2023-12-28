@@ -20,21 +20,24 @@ class Client:
         self.request_sock.connect((self.address, self.request_port))
         #Connection to request server port
         self.notification_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.notification_sock.connect((self.address, self.notifiaction_port))
+        self.notification_sock.connect((self.address, self.notification_port))
 
-        while not self.server_shut_down:
+    def make_request(self, request):
+        # need to send request in json format
+        
+        try:
+            request = json.loads(request)
+            if type(request) == int:
+                request_type = request
+            else:
+                request_type = request["command"]
+            is_json = True
+        except json.JSONDecodeError:
+            request_type = request.split(" ")[0]
+            
+        request_type = request["command"].upper()
+        if not self.server_shut_down:
             is_json = False
-
-            request = input("\nRequest: ")
-            try:
-                request = json.loads(request)
-                if type(request) == int:
-                    request_type = request
-                else:
-                    request_type = request["command"]
-                is_json = True
-            except json.JSONDecodeError:
-                request_type = request.split(" ")[0]
 
             if request_type == "CREATE_USER":
                 if not is_json:
@@ -240,6 +243,21 @@ class Client:
                 self.server_shut_down = True            
             else:
                 print("Invalid command")
+
+        def notification(self, user_id):
+            pass
+            # while not self.server_shut_down:
+            #     try:
+            #         notification = self.notification_sock.recv(1024).decode("utf8")
+            #         notification = json.loads(notification)
+            #         if notification["user_id"] == user_id:
+            #             print(notification["message"])
+            #     except json.JSONDecodeError:
+            #         print("Invalid notification format")
+            #     except ConnectionResetError:
+            #         print("Server is shut down")
+            #         self.server_shut_down = True
+            #         break
 
 if __name__ == "__main__":
     client = Client()
