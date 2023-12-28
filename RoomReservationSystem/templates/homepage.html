@@ -19,7 +19,11 @@
                 <div class="container">
                     {% if user_authenticated %}
                       <h1 style="font-size: 32px; margin-bottom: 8px">Welcome, {{ user.username }}</h1>
-
+                      <form action="{% url 'room-reservation-app:list-organizations' %}" class="list-organizations" method="get" >
+                        
+                        <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">List Organizations</Button>
+                        
+                      </form>
 
                     {% else %}
                       <form action="{% url 'room-reservation-app:login' %}" class="login" method="post" >

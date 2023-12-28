@@ -1,10 +1,10 @@
-from .event import Event
-from .room import Room
+from event import Event
+from room import Room
 from datetime import datetime, timedelta, time
 import uuid
 from collections import OrderedDict
 import pdb
-from .singletonCatalgoue import Catalogue
+from singletonCatalgoue import Catalogue
 
 class Organization:
     

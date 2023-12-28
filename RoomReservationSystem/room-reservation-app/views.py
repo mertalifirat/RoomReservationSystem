@@ -17,7 +17,9 @@ from . import constants
 
 import os
 from .forms import UserForm
-        
+
+clientManager = ClientManager()
+
 class Login(View):
     def get(self, request):
 
@@ -32,20 +34,21 @@ class Login(View):
             login(request, user)
             print("user logged in")
             user_id = request.user.id
-            
+            client = Client()
+            clientManager.addClient(user_id, client)
+            #pdb.set_trace()
             #Connect to phase2 server
-            self.request_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.request_sock.connect((constants.address, constants.request_port))
+            clientManager.getClient(user_id).connect()
             #Create request
             request = {
                 "command": "LOGIN",
                 "username": user.username,
                 "password": user.password,
-                "django_id": user_id,
             }
             #Send request to phase2 server
-            self.request_sock.send(str.encode(json.dumps(request)))
-            print(self.request_sock.recv(4096).decode("utf8"))
+            response = clientManager.getClient(user_id).make_request(request)
+            #Receive response from phase2 server
+            print(response)
             # Generate token
             token, created = Token.objects.get_or_create(user=user)
             print(created)
@@ -82,7 +85,7 @@ class SignUp(View):
             print(form.cleaned_data['username'])
             request = {
                 "command": "CREATE_USER",
-                "django_id": -1,
+                "django_id": user.id,
                 "username": form.cleaned_data['username'],
                 "email": form.cleaned_data['email'],
                 "fullname": form.cleaned_data['first_name'],
@@ -111,8 +114,14 @@ class ListOrganizations(LoginRequiredMixin, View):
         user = request.user
         user_authenticated = user.is_authenticated
         form = AuthenticationForm()
-        organizations = Organization.objects.all()
-        return render(request, 'list-organizations.html', {'form': form,
+        #Create request
+        request = {
+            "command": "LIST_ORGANIZATIONS",
+        }
+        organizations = clientManager.getClient(user.id).make_request(request)
+        print(organizations)
+        #organizationCollections = list(Organization.objects)
+        return render(request, 'homepage.html', {'form': form,
                                                  'user_authenticated': user_authenticated,
                                                  'organizations': organizations})
     def post(self,request):

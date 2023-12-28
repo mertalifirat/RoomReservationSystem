@@ -1,16 +1,15 @@
 import cmd
-from classes import *
 from datetime import time
 import uuid
 import datetime
-from classes.room import Room
-from classes.user import User
-from classes.event import Event
-from classes.organization import Organization
-from classes.view import View
+from room import Room
+from user import User
+from event import Event
+from organization import Organization
+from view import View
 from datetime import datetime
 import pickle
-from classes.singletonCatalgoue import Catalogue
+from singletonCatalgoue import Catalogue
 
 #{uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"):["LIST","RESERVE","DELETE"],uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]}
 class RoomReservationSystemDemo(cmd.Cmd):

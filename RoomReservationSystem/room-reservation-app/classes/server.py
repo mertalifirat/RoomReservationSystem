@@ -125,11 +125,9 @@ class RequestHandler(Thread):
                     print(request)
                     username = request["username"]
                     encoded_password = request["password"]
+
                     c = self.db.curs
-                    #Settting django_id
-                    c.execute(
-                        f"UPDATE Users SET django_id = '{request['django_id']}' WHERE username = '{username}'"
-                    )
+                    
                     row = c.execute(
                         f"SELECT user_id, password FROM Users WHERE username = '{username}'"
                     ).fetchone()
