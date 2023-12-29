@@ -52,17 +52,26 @@ class Login(View):
             # Generate token
             token, created = Token.objects.get_or_create(user=user)
             print(created)
-            response = redirect('room-reservation-app:home')
+            response = redirect('reservationapp:home')
             # Set token as a cookie
             response.set_cookie('auth_token', token.key)
             return response
-        return render(request, 'templates/login-page.html', {'form': form, 'user_authenticated': False})
+        return render(request, 'login-page.html', {'form': form, 'user_authenticated': False})
 
 
 class Logout(LoginRequiredMixin, View):
     def get(self, request):
         logout(request)
-        return redirect('room-reservation-app:home')
+        return redirect('reservationapp:home')
+class Save(LoginRequiredMixin, View):
+    def get(self,request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        serverRequest = {
+            "command": "SAVE",
+        }
+        clientManager.getClient(user.id).make_request(serverRequest)
+        return render(request, 'homepage.html', {'user_authenticated': user_authenticated,})
 
 class SignUp(View):
     def get(self, request):
@@ -94,7 +103,7 @@ class SignUp(View):
             self.request_sock.send(str.encode(json.dumps(request)))
             server_response = self.request_sock.recv(4096).decode("utf8")
             self.request_sock.close()
-            return redirect('room-reservation-app:login')
+            return redirect('reservationapp:login')
         return render(request, 'signup.html', {'form': form})
 
 
@@ -115,15 +124,61 @@ class ListOrganizations(LoginRequiredMixin, View):
         user_authenticated = user.is_authenticated
         form = AuthenticationForm()
         #Create request
-        request = {
+        serverRequest = {
             "command": "LIST_ORGANIZATIONS",
         }
-        organizations = clientManager.getClient(user.id).make_request(request)
+        organizations = json.loads(clientManager.getClient(user.id).make_request(serverRequest))
         print(organizations)
-        #organizationCollections = list(Organization.objects)
+        for org in organizations:
+            Organization.objects.get_or_create(orgServerId = org["org_id"],orgName=org["org_name"], orgOwner=org["org_owner"])
+        organizationCollections = list(Organization.objects.filter().only('orgName', 'orgOwner'))
+        #pdb.set_trace()
         return render(request, 'homepage.html', {'form': form,
                                                  'user_authenticated': user_authenticated,
-                                                 'organizations': organizations})
+                                                 'organizations': organizationCollections})
     def post(self,request):
-        pass
+        user = request.user
+        selectedOrgServerId = request.POST.get('orgServerId')
+        selectedOrgName = request.POST.get('orgName')
+        user_authenticated = user.is_authenticated
+        #Create request
+        serverRequest = {
+            "command": "ATTACH_ORGANIZATION",
+            "organization_id": request.POST.get('orgServerId'),
+        }
+        print(clientManager.getClient(user.id).make_request(serverRequest))
+        #pdb.set_trace()
+        return render(request, 'organization.html', {
+                                                 'user_authenticated': user_authenticated,
+                                                 'selectedOrgServerId': selectedOrgServerId,
+                                                 'selectedOrgName': selectedOrgName,})
+class OrganizationView(LoginRequiredMixin,View):
+    def get(self,request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        #print(request)
+        form = AuthenticationForm()
+        return render(request, 'organization.html', {'form': form,
+                                                 'user_authenticated': user_authenticated,})
+    def post(self,request):
+        user = request.user
+        selectedOrgServerId = request.POST.get('orgServerId')
+        selectedOrgName = request.POST.get('orgName')
+        user_authenticated = user.is_authenticated
+        #Create request
+        serverRequest = {
+            "command": "LIST_ROOMS",
+        }
+        rooms = json.loads(clientManager.getClient(user.id).make_request(serverRequest))
+        print(rooms)
+        for room in rooms:
+            #pdb.set_trace()
+            Room.objects.get_or_create(roomId = room["room_id"],roomName=room["room_name"], roomCapacity=room["room_capacity"], roomWorkingHours=room["room_working_hours"])
+        roomCollections = list(Room.objects.filter().only('roomName', 'roomCapacity', 'roomWorkingHours'))
+        return render(request, 'organization.html', {
+                                                 'user_authenticated': user_authenticated,
+                                                 'selectedOrgServerId': selectedOrgServerId,
+                                                 'selectedOrgName': selectedOrgName,
+                                                 'rooms': roomCollections})
         
+

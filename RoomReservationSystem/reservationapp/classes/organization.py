@@ -31,16 +31,26 @@ class Organization:
         return result
     
     def getOrganizationInfo(self):
-        result = f" Organization id: {self.id} \n Organization name: {self.name} \n Organization owner: {self.owner} \n \n"
+        result = {
+            "org_id": str(self.id),
+            "org_owner": self.owner,
+            "org_name": self.name,
+        }
         return result
  
     def listObjects(self):
         return self.__repr__()
     
     def listRooms(self):
-        result = ""
+        result = []
         for key in self.roomList:
-            result += f"{self.roomList[key]}\n"
+            result.append({
+                "room_id": str(self.roomList[key][0].getId()),
+                "room_name": self.roomList[key][0].getName(),
+                "room_capacity": self.roomList[key][0].getCapacity(),
+                "room_working_hours": self.roomList[key][0].getWorkingHours()[0].strftime("%H:%M") + " " + self.roomList[key][0].getWorkingHours()[1].strftime("%H:%M"),
+                
+            })
         return result
     def listEvents(self):
         result = ""

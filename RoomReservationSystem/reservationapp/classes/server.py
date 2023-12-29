@@ -102,6 +102,7 @@ class RequestHandler(Thread):
                     )
                     
                     user_id = str(user.getId())
+                    django_id = request["django_id"]
 
                     #Add user to catalogue
                     Server.organization_and_user_list.addUser(user)
@@ -109,7 +110,7 @@ class RequestHandler(Thread):
                     self.db.insert(
                         "Users",
                         ("django_id","user_id", "username", "email", "fullname", "password"),
-                        request["django_id"],
+                        django_id,
                         user_id,
                         user.get_username(),
                         user.get_email(),
@@ -145,11 +146,11 @@ class RequestHandler(Thread):
             #Organization operations
             elif request_type ==  "LIST_ORGANIZATIONS": #List organizations
                 with Server.mutex:
-                    result = ""
+                    result = []
                     if client_user_id is not None:
                         for organization in Server.organization_and_user_list.getOrganizationList().values():
-                            result += organization.getOrganizationInfo()
-                        self.conn.send(str.encode(result))
+                            result.append(organization.getOrganizationInfo())
+                        self.conn.send(str.encode(json.dumps(result)))
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))    
             
@@ -181,8 +182,9 @@ class RequestHandler(Thread):
                         else:    
                             org = Server.organization_and_user_list.getOrganization(organization_id)
                             #Check if user has permission to list rooms
+                           
                             if "LIST" in org.getUserPermissions(client_user_id):
-                                self.conn.send(str.encode(org.listRooms()))
+                                self.conn.send(str.encode(json.dumps(org.listRooms())))
                             else:
                                 self.conn.send("You don't have access for listing the rooms".encode("utf8"))    
                     else:
@@ -412,7 +414,7 @@ class RequestHandler(Thread):
                         self.conn.send("Logout successful".encode("utf8"))
                     else:    
                         self.conn.send("Not authorized, please login".encode("utf8")) 
-            elif request_type ==  "EXIT":
+            elif request_type ==  "SAVE":
                 notexit = False
                 pickle.dump(Server.organization_and_user_list,open("organizations.p","wb"))
                 self.conn.send("Exit successful".encode("utf8"))

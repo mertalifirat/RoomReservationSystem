@@ -18,20 +18,42 @@
                 <br><br><br>
                 <div class="container">
                     {% if user_authenticated %}
+                      {% if organizations %}
+                        <div class="row">
+          
+                        {% for org in organizations %}
+                            
+                          <h3 style="margin-top:100px">Organization name: {{ org.orgName }}</h3>
+                          <p> <b> Organization owner: {{ org.orgOwner}} </b></p>
+                          <form action="{% url 'reservationapp:list-organizations' %}" class="list-organizations" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="orgServerId" value="{{ org.orgServerId }}">
+                            <input type="hidden" name="orgName" value="{{ org.orgName }}">
+                            <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Attach Organization</Button>
+                          </form>
+                             
+                        {% endfor %}
+ 
+                        </div>
+                      {% endif %}
                       <h1 style="font-size: 32px; margin-bottom: 8px">Welcome, {{ user.username }}</h1>
-                      <form action="{% url 'room-reservation-app:list-organizations' %}" class="list-organizations" method="get" >
-                        
+                      <form action="{% url 'reservationapp:list-organizations' %}" class="list-organizations" method="get" >
+                        {% csrf_token %}
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">List Organizations</Button>
-                        
+                          
+                      </form>
+                      <form action="{% url 'reservationapp:logout' %}" class="logout" method="get" > 
+                        {% csrf_token %}
+                        <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Logout</Button>    
                       </form>
 
                     {% else %}
-                      <form action="{% url 'room-reservation-app:login' %}" class="login" method="post" >
+                      <form action="{% url 'reservationapp:login' %}" class="login" method="post" >
                         {% csrf_token %}
                         {{ form|crispy }}
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Login</Button>
                         <br>
-                        <small style="margin-top: 5px">Don't have an account? <a href="{% url 'room-reservation-app:signup' %}"><i class="fas fa-user-plus"></i></a> </small>
+                        <small style="margin-top: 5px">Don't have an account? <a href="{% url 'reservationapp:signup' %}"><i class="fas fa-user-plus"></i></a> </small>
                         
                       </form>
                     {% endif %}

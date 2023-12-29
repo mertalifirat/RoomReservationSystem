@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 
 from .views import *
-app_name = 'room-reservation-app'
+app_name = 'reservationapp'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,10 +27,12 @@ urlpatterns = [
     path('logout', Logout.as_view(), name="logout"),
     path('sign-up', SignUp.as_view(), name="signup"),
     path('list-organizations', ListOrganizations.as_view(), name="list-organizations"),
+    path('organization', OrganizationView.as_view(), name="organization"),
+    path('save', Save.as_view(), name="save"),
     # path('upload-photo', UploadPhoto.as_view(), name="upload_photo"),
     # path('photo', PhotoView.as_view(), name="update_photo"),
     # path('photos', PhotoView.as_view(), name="photos"),
-    # path('collections', CollectionView.as_view(), name="collections"),
+    
     # path('collection/<int:id>', CollectionDetail.as_view(), name="collection_detail"),
     # path('views', Filter.as_view(), name="views"),
     # path('view/<int:id>', FilterViewDetail.as_view(), name="view_detail"),

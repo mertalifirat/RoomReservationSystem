@@ -50,17 +50,17 @@ class Client:
             elif request_type == "ATTACH_ORGANIZATION":
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(4096).decode("utf8"))
+                return(self.request_sock.recv(4096).decode("utf8"))
 
             elif request_type == "DETACH_ORGANIZATION":
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(4096).decode("utf8"))    
+                return(self.request_sock.recv(4096).decode("utf8"))    
 
             elif request_type == "LIST_ROOMS": #List rooms in attached organization
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(4096).decode("utf8"))
+                return(self.request_sock.recv(4096).decode("utf8"))
 
             elif request_type == "ADD_ROOM": #Working hours are in format: %H:%M-%H:%M
                 
@@ -112,7 +112,12 @@ class Client:
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
                 print(self.request_sock.recv(1024).decode("utf8"))
-                self.server_shut_down = True            
+                self.server_shut_down = True          
+            elif request_type == "SAVE":
+                
+                self.request_sock.send(str.encode(json.dumps(request)))
+                return(self.request_sock.recv(1024).decode("utf8"))
+                  
             else:
                 print("Invalid command")
 

@@ -1,0 +1,56 @@
+{% extends 'index.html' %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'css/my_profile.css' %}?v1.3">
+{#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>#}
+    <title>Organization Page</title>
+
+{% endblock %}
+
+
+{% block content %}
+    <li class="selected">
+        <div class="cd-full-width">
+            <div class="container-fluid js-tm-page-content tm-page-pad" data-page-no="5" data-page-type="gallery">
+                <br><br><br>
+                <div class="container">
+                    {% if user_authenticated %}
+                    <h1 style="font-size: 32px; margin-bottom: 8px">Organization: {{ selectedOrgName }}</h1>  
+                    {% if rooms %}
+                        <div class="row">
+
+                        {% for room in rooms %}
+                          <h3 style="margin-top:100px">Room name: {{ room.roomName }}</h3>
+                          <p> <b> Capacity: {{ room.roomCapacity}} </b></p>
+                          <p> <b> Working hours: {{ room.roomWorkingHours}} </b></p>
+                        {% endfor %}
+
+                        </div>
+                      {% endif %}
+                      <form action="{% url 'reservationapp:organization' %}" class="organization" method="post" >
+                        {% csrf_token %}
+                        <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
+                        <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                        <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">List Rooms</Button>
+                          
+                      <form action="{% url 'reservationapp:logout' %}" class="logout" method="get" > 
+                        {% csrf_token %}
+                        <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Access</Button>
+                          
+                      </form>
+                      <form action="{% url 'reservationapp:logout' %}" class="logout" method="get" > 
+                        {% csrf_token %}
+                        <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Edit Organization</Button>
+                          
+                      </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </li>
+
+
+{% endblock %}

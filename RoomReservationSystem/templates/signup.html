@@ -16,7 +16,7 @@
             <div class="container-fluid js-tm-page-content" data-page-no="1" data-page-type="gallery">
                 <br><br><br>
                 <div class="container">
-                        <form action="{% url 'room-reservation-app:signup' %}" style="margin: 0 auto; width: 300px" method="post" >
+                        <form action="{% url 'reservationapp:signup' %}" style="margin: 0 auto; width: 300px" method="post" >
                         {% csrf_token %}
                         {{ form|crispy }}
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Register</Button>
