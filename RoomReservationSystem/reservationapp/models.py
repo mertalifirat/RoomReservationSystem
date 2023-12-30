@@ -40,6 +40,20 @@ class Room(models.Model):
     roomName = models.CharField(max_length=100)
     roomCapacity = models.IntegerField(default=0)
     roomWorkingHours = models.CharField(max_length=100)
+    roomPermissions = models.CharField(max_length=100,default="")
+
+class Event(models.Model):
+    class Meta:
+        ordering = ["eventTitle"]
+
+    eventId = models.CharField(max_length=100)
+    eventTitle = models.CharField(max_length=100)
+    eventDescription = models.CharField(max_length=100)
+    eventCategory = models.CharField(max_length=100)
+    eventCapacity = models.IntegerField(default=0)
+    eventDuration = models.IntegerField(default=0)
+    eventWeekly = models.IntegerField(default=0)
+    eventPermissions = models.CharField(max_length=100)
 
 
              

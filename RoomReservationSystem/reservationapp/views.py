@@ -16,7 +16,7 @@ import socket
 from . import constants
 
 import os
-from .forms import UserForm
+from .forms import EventForm, RoomForm, UserForm
 
 clientManager = ClientManager()
 
@@ -123,6 +123,7 @@ class ListOrganizations(LoginRequiredMixin, View):
         user = request.user
         user_authenticated = user.is_authenticated
         form = AuthenticationForm()
+        print(request)
         #Create request
         serverRequest = {
             "command": "LIST_ORGANIZATIONS",
@@ -141,6 +142,7 @@ class ListOrganizations(LoginRequiredMixin, View):
         selectedOrgServerId = request.POST.get('orgServerId')
         selectedOrgName = request.POST.get('orgName')
         user_authenticated = user.is_authenticated
+
         #Create request
         serverRequest = {
             "command": "ATTACH_ORGANIZATION",
@@ -149,36 +151,124 @@ class ListOrganizations(LoginRequiredMixin, View):
         print(clientManager.getClient(user.id).make_request(serverRequest))
         #pdb.set_trace()
         return render(request, 'organization.html', {
-                                                 'user_authenticated': user_authenticated,
-                                                 'selectedOrgServerId': selectedOrgServerId,
-                                                 'selectedOrgName': selectedOrgName,})
+                                                    'user_authenticated': user_authenticated,
+                                                    'selectedOrgServerId': selectedOrgServerId,
+                                                    'selectedOrgName': selectedOrgName,})
 class OrganizationView(LoginRequiredMixin,View):
     def get(self,request):
         user = request.user
         user_authenticated = user.is_authenticated
+        selectedOrgServerId = request.POST.get('orgServerId')
+        selectedOrgName = request.POST.get('orgName')
         #print(request)
-        form = AuthenticationForm()
-        return render(request, 'organization.html', {'form': form,
-                                                 'user_authenticated': user_authenticated,})
+        return render(request, 'organization.html', {'user_authenticated': user_authenticated,
+                                                     'selectedOrgServerId': selectedOrgServerId,
+                                                     'selectedOrgName': selectedOrgName,})
     def post(self,request):
         user = request.user
         selectedOrgServerId = request.POST.get('orgServerId')
         selectedOrgName = request.POST.get('orgName')
         user_authenticated = user.is_authenticated
-        #Create request
-        serverRequest = {
-            "command": "LIST_ROOMS",
-        }
-        rooms = json.loads(clientManager.getClient(user.id).make_request(serverRequest))
-        print(rooms)
-        for room in rooms:
+        if request.POST.get('list'):
+            #Create request
+            serverRequest = {
+                "command": "LIST_ROOMS",
+            }
+            rooms = json.loads(clientManager.getClient(user.id).make_request(serverRequest))
+            print(rooms)
+            for room in rooms:
+                #pdb.set_trace()
+                Room.objects.get_or_create(roomId = room["room_id"],roomName=room["room_name"], roomCapacity=room["room_capacity"], roomWorkingHours=room["room_working_hours"])
+            roomCollections = list(Room.objects.filter().only('roomName', 'roomCapacity', 'roomWorkingHours'))
+            form = RoomForm()
+            return render(request, 'organization.html', {
+                                                    'form': form,
+                                                    'user_authenticated': user_authenticated,
+                                                    'selectedOrgServerId': selectedOrgServerId,
+                                                    'selectedOrgName': selectedOrgName,
+                                                    'rooms': roomCollections})
+        if request.POST.get('deleteRoom'):
+            #Create request
+            print(request.POST.get('roomServerId'))
+            serverRequest = {
+                "command": "DELETE_ROOM",
+                "room_id": request.POST.get('roomServerId'),
+            }
+            print(clientManager.getClient(user.id).make_request(serverRequest))
+            Room.objects.filter(roomId = request.POST.get('roomServerId')).delete()
+            form = RoomForm()
+            return render(request, 'organization.html', {
+                                                    'form': form,
+                                                    'user_authenticated': user_authenticated,
+                                                    'selectedOrgServerId': selectedOrgServerId,
+                                                    'selectedOrgName': selectedOrgName,})
+        if request.POST.get('addRoom'):
+            #Create request
+            form = RoomForm(request.POST)
             #pdb.set_trace()
-            Room.objects.get_or_create(roomId = room["room_id"],roomName=room["room_name"], roomCapacity=room["room_capacity"], roomWorkingHours=room["room_working_hours"])
-        roomCollections = list(Room.objects.filter().only('roomName', 'roomCapacity', 'roomWorkingHours'))
-        return render(request, 'organization.html', {
-                                                 'user_authenticated': user_authenticated,
-                                                 'selectedOrgServerId': selectedOrgServerId,
-                                                 'selectedOrgName': selectedOrgName,
-                                                 'rooms': roomCollections})
+            
+            if form.is_valid():
+                serverRequest = {
+                    "command": "ADD_ROOM",
+                    "room_name": form.cleaned_data['roomName'],
+                    "room_capacity": form.cleaned_data['roomCapacity'],
+                    "room_working_hours": form.cleaned_data['roomWorkingHours'],
+                    "room_permissions": form.cleaned_data['roomPermissions'],
+                }
+                print(clientManager.getClient(user.id).make_request(serverRequest))
+                form = RoomForm()
+                return render(request, 'organization.html', {
+                                                        'form': form,
+                                                        'user_authenticated': user_authenticated,
+                                                        'selectedOrgServerId': selectedOrgServerId,
+                                                        'selectedOrgName': selectedOrgName,})
+        if request.POST.get('showRoom'):
+            #Go to room page
+            selectedRoomId = request.POST.get('roomServerId')
+            selectedRoomName = request.POST.get('roomName')
+            form = EventForm()
+            return render(request, 'room.html', {
+                                                    'form': form,
+                                                    'user_authenticated': user_authenticated,
+                                                    'selectedRoomServerId': selectedRoomId,
+                                                    'selectedRoomName': selectedRoomName,})
+class roomView(LoginRequiredMixin,View):
+    def get(self,request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        selectedRoomServerId = request.POST.get('roomServerId')
+        selectedRoomName = request.POST.get('roomName')
+        form = EventForm()
+        #print(request)
+        return render(request, 'room.html', {'user_authenticated': user_authenticated,
+                                             'form': form,
+                                             'selectedRoomServerId': selectedRoomServerId,
+                                             'selectedRoomName': selectedRoomName,})
+    def post(self,request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        selectedRoomServerId = request.POST.get('roomServerId')
+        selectedRoomName = request.POST.get('roomName')
+
+        if request.POST.get('listReservedEvents'):
+            #Create request
+            serverRequest = {
+                "command": "LIST_RESERVED_EVENTS",
+                "room_id": selectedRoomServerId,
+            }
+            events = json.loads(clientManager.getClient(user.id).make_request(serverRequest))
+            print(events)
+            for event in events:
+                Event.objects.get_or_create(eventId = event["event_id"],eventTitle=event["event_title"], eventCategory=event["event_category"], eventDescription=event["event_description"])
+            eventCollections = list(Event.objects.filter().only('eventTitle', 'eventCategory', 'eventDescription'))
+            form = EventForm()
+            return render(request, 'room.html', {
+                                                    'user_authenticated': user_authenticated,
+                                                    'form': form,
+                                                    'selectedRoomServerId': selectedRoomServerId,
+                                                    'selectedRoomName': selectedRoomName,
+                                                    'events': eventCollections})
+            
+            
         
 

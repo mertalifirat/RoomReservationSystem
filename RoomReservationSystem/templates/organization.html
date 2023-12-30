@@ -4,17 +4,23 @@
 {% load crispy_forms_tags %}
 
 {% block head %}
-    <link rel="stylesheet" href="{% static 'css/my_profile.css' %}?v1.3">
+  <link rel="stylesheet" href="{% static 'css/my_profile.css' %}?v1.3">
 {#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>#}
-    <title>Organization Page</title>
+  <title>Organization Page</title>
 
 {% endblock %}
-
+<style>
+  .form-right{
+    width: 300px;
+    margin-right: 20px;
+    margin-top: 10px;
+  }
+</style>
 
 {% block content %}
-    <li class="selected">
-        <div class="cd-full-width">
-            <div class="container-fluid js-tm-page-content tm-page-pad" data-page-no="5" data-page-type="gallery">
+  <li class="selected">
+    <div class="cd-full-width">
+      <div class="container-fluid js-tm-page-content tm-page-pad" data-page-no="5" data-page-type="gallery">
                 <br><br><br>
                 <div class="container">
                     {% if user_authenticated %}
@@ -26,6 +32,22 @@
                           <h3 style="margin-top:100px">Room name: {{ room.roomName }}</h3>
                           <p> <b> Capacity: {{ room.roomCapacity}} </b></p>
                           <p> <b> Working hours: {{ room.roomWorkingHours}} </b></p>
+                          <form action="{% url 'reservationapp:organization' %}" class="organization" method="post" >
+                            {% csrf_token %}
+                            <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
+                            <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                            <input type="hidden" name="roomServerId" value="{{ room.roomId }}">
+                            <input type="hidden" name="roomName" value="{{ room.roomName }}">
+                            <input type="hidden" name="deleteRoom" value="true">
+                            <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Delete Room</Button>
+                          </form>
+                          <form action="{% url 'reservationapp:organization' %}" class="organization" method="post" >
+                            {% csrf_token %}
+                            <input type="hidden" name="roomServerId" value="{{ room.roomId }}">
+                            <input type="hidden" name="roomName" value="{{ room.roomName }}">
+                            <input type="hidden" name="showRoom" value="true">
+                            <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Room Info</Button>
+                          </form>    
                         {% endfor %}
 
                         </div>
@@ -34,18 +56,32 @@
                         {% csrf_token %}
                         <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
                         <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                        <input type="hidden" name="list" value="true">
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">List Rooms</Button>
-                          
+                      </form>
+
+                      <form action="{% url 'reservationapp:list-organizations' %}" class="list-organizations" method="get" >
+                        {% csrf_token %}
+                        <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Back</Button>
+                      </form> 
+
                       <form action="{% url 'reservationapp:logout' %}" class="logout" method="get" > 
                         {% csrf_token %}
+              
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Access</Button>
                           
                       </form>
-                      <form action="{% url 'reservationapp:logout' %}" class="logout" method="get" > 
-                        {% csrf_token %}
-                        <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Edit Organization</Button>
-                          
-                      </form>
+                      <div style="display: flex; justify-content: flex-end;">
+                        <div class="form-right">
+                          <form action="{% url 'reservationapp:organization' %}" class="organization" method="post">
+                            {% csrf_token %}
+                            {{form}}
+                            <input type="hidden" name="addRoom" value="true">
+                            <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Add Room</Button>
+                          </form>
+                        </div>
+                      </div>
+                      
                     {% endif %}
                 </div>
             </div>

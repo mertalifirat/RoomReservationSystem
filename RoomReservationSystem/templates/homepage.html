@@ -40,11 +40,6 @@
                       <form action="{% url 'reservationapp:list-organizations' %}" class="list-organizations" method="get" >
                         {% csrf_token %}
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">List Organizations</Button>
-                          
-                      </form>
-                      <form action="{% url 'reservationapp:logout' %}" class="logout" method="get" > 
-                        {% csrf_token %}
-                        <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Logout</Button>    
                       </form>
 
                     {% else %}

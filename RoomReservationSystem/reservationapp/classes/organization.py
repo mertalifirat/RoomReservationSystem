@@ -108,16 +108,16 @@ class Organization:
         return self.eventList
 
     def getRoom(self, id):
-        return self.roomList.get(id)[0]
+        return self.roomList[id][0]
 
     def getEvent(self, id):
-        return self.eventList.get(id)[0]
+        return self.eventList[id][0]
     
     def getEventsReservedRoom(self, id):
-        return self.roomList.get(id)[1]
+        return self.roomList[id][1]
 
     def getRoomReservedByEvent(self, id):
-        return self.eventList.get(id)[1]
+        return self.eventList[id][1]
     
     def getPermissions(self):
         return self.permissions

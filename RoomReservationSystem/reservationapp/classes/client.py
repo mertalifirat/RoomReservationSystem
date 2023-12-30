@@ -65,53 +65,53 @@ class Client:
             elif request_type == "ADD_ROOM": #Working hours are in format: %H:%M-%H:%M
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(4096).decode("utf8"))
+                return(self.request_sock.recv(4096).decode("utf8"))
 
             elif request_type == "ACCESS":
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(4096).decode("utf8"))
+                return(self.request_sock.recv(4096).decode("utf8"))
 
             elif request_type == "DELETE_ROOM":
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))
+                return(self.request_sock.recv(1024).decode("utf8"))
 
             elif request_type == "LIST_RESERVED_EVENTS":
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(4096).decode("utf8"))
+                return(self.request_sock.recv(4096).decode("utf8"))
 
             elif request_type == "RESERVE": #Start format is: %Y-%m-%d-%H:%M
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))
+                return(self.request_sock.recv(1024).decode("utf8"))
 
             elif request_type == "DELETE_RESERVATION": #Start and end are in format: %Y-%m-%d-%H:%M
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))
+                return(self.request_sock.recv(1024).decode("utf8"))
             elif request_type == "READ_EVENT":
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(4096).decode("utf8"))    
+                return(self.request_sock.recv(4096).decode("utf8"))    
             elif request_type == "UPDATE_EVENT":
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))
+                return(self.request_sock.recv(1024).decode("utf8"))
             elif request_type == "DELETE_EVENT":
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))                   
+                return(self.request_sock.recv(1024).decode("utf8"))                   
             elif request_type == "LOGOUT":
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))
+                return(self.request_sock.recv(1024).decode("utf8"))
 
             elif request_type == "EXIT":
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                print(self.request_sock.recv(1024).decode("utf8"))
+                return(self.request_sock.recv(1024).decode("utf8"))
                 self.server_shut_down = True          
             elif request_type == "SAVE":
                 
@@ -119,7 +119,7 @@ class Client:
                 return(self.request_sock.recv(1024).decode("utf8"))
                   
             else:
-                print("Invalid command")
+                return("Invalid command")
 
         def notification(self, user_id):
             pass

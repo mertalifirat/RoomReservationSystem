@@ -74,7 +74,9 @@ class RequestHandler(Thread):
         self.current = 0
         self.db = db
         Thread.__init__(self)
-
+    def __del__(self):
+        print("Request server shutdown")
+        pickle.dump(Server.organization_and_user_list,open("organizations.p","wb"))
     def run(self):
         print("Request server started")
         client_user_id = None
@@ -182,7 +184,7 @@ class RequestHandler(Thread):
                         else:    
                             org = Server.organization_and_user_list.getOrganization(organization_id)
                             #Check if user has permission to list rooms
-                           
+                            # pdb.set_trace()
                             if "LIST" in org.getUserPermissions(client_user_id):
                                 self.conn.send(str.encode(json.dumps(org.listRooms())))
                             else:
@@ -200,13 +202,14 @@ class RequestHandler(Thread):
                             org = Server.organization_and_user_list.getOrganization(organization_id)
                             #Check if user has permission to add rooms
                             if "ADD" in org.getUserPermissions(client_user_id):
-                                start_end = request["working_hours"].split("-")
+                                #pdb.set_trace()
+                                start_end = request["room_working_hours"].split("-")
                                 start = datetime.strptime(start_end[0], "%H:%M").time()
                                 end = datetime.strptime(start_end[1], "%H:%M").time()
                                 working_hours = (start,end)
                                 #Room with no permissions
-                                permissions = {}
-                                room = Room(request["room_name"],int(request["x"]),int(request["y"]),int(request["capacity"]),working_hours,permissions)
+                                permissions = { client_user_id :request["room_permissions"]}
+                                room = Room(request["room_name"],0,0,int(request["room_capacity"]),working_hours,permissions)
                                 org.addRoom(room)
                                 self.conn.send(str.encode("Room added"))
                             else:
@@ -238,7 +241,10 @@ class RequestHandler(Thread):
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
                             org = Server.organization_and_user_list.getOrganization(organization_id)
+                            print(org.getOrganizationInfo())
                             #Check if user has permission to delete room TODO: check if the user is owner of the organization
+                            #pdb.set_trace()
+                            print(request["room_id"])
                             room_id = uuid.UUID(request["room_id"])
                             room = org.getRoom(room_id)
                             if "DELETE" in room.getUserPermissions(client_user_id):
@@ -260,18 +266,24 @@ class RequestHandler(Thread):
                         if organization_id is None:
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
-                            result = ""
+                            result = []
                             org = Server.organization_and_user_list.getOrganization(organization_id)
                             #Check if user has permission to list reserved events
                             room_id = uuid.UUID(request["room_id"])
                             room = org.getRoom(room_id)
                             if "LIST" in room.getUserPermissions(client_user_id):
                                 for eventId,start,end in org.getEventsReservedRoom(room_id):
-                                    result += f"Event name: {org.getEvent(eventId).getTitle()} Start: {start} End: {end}\n"
-                                if result == "":
-                                    self.conn.send("No events reserved".encode("utf8"))
-                                else:        
-                                    self.conn.send(str.encode(result))
+                                    result.append({
+                                        "event_id": str(eventId),
+                                        "event_title": org.getEvent(eventId).getTitle(),
+                                        "event_description": org.getEvent(eventId).getDescription(),
+                                        "event_category": org.getEvent(eventId).getCategory(),
+                                        "event_capacity": str(org.getEvent(eventId).getCapacity()),
+                                        "event_duration": str(org.getEvent(eventId).getDuration()),
+                                        "event_weekly": str(org.getEvent(eventId).getWeekly()),
+                                    })
+                                    
+                                self.conn.send(str.encode(json.dumps(result)))
                             else:
                                 self.conn.send("You don't have access for listing the reserved events".encode("utf8"))    
                     else:
@@ -419,7 +431,7 @@ class RequestHandler(Thread):
                 pickle.dump(Server.organization_and_user_list,open("organizations.p","wb"))
                 self.conn.send("Exit successful".encode("utf8"))
 
-
+            pickle.dump(Server.organization_and_user_list,open("organizations.p","wb"))
             received_msg = self.conn.recv(1024)
               
         #Kill connection    
@@ -460,7 +472,11 @@ class NotificationHandler(Thread):
 if __name__ == "__main__":
     
     server = Server(1422,1428)
-
-    server.start_server()
+    try:
+        server.start_server()
+    except KeyboardInterrupt:
+        print("Server shutdown")
+        pickle.dump(Server.organization_and_user_list,open("organizations.p","wb"))
+    
 
   
