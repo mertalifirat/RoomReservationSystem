@@ -143,7 +143,7 @@ class ListOrganizations(LoginRequiredMixin, View):
         selectedOrgServerId = request.POST.get('orgServerId')
         selectedOrgName = request.POST.get('orgName')
         user_authenticated = user.is_authenticated
-
+        form = RoomForm()
         #Create request
         serverRequest = {
             "command": "ATTACH_ORGANIZATION",
@@ -153,6 +153,7 @@ class ListOrganizations(LoginRequiredMixin, View):
         #pdb.set_trace()
         return render(request, 'organization.html', {
                                                     'user_authenticated': user_authenticated,
+                                                    'form': form,
                                                     'selectedOrgServerId': selectedOrgServerId,
                                                     'selectedOrgName': selectedOrgName,})
 class OrganizationView(LoginRequiredMixin,View):
@@ -237,6 +238,16 @@ class OrganizationView(LoginRequiredMixin,View):
                                                     'selectedOrgName': selectedOrgName,
                                                     'selectedRoomServerId': selectedRoomId,
                                                     'selectedRoomName': selectedRoomName,})
+class MapView(LoginRequiredMixin,View):
+    def get(self,request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        selectedOrgServerId = request.GET.get('orgServerId')
+        selectedOrgName = request.GET.get('orgName')
+        #print(request)
+        return render(request, 'map.html', {'user_authenticated': user_authenticated,
+                                                     'selectedOrgServerId': selectedOrgServerId,
+                                                     'selectedOrgName': selectedOrgName,})        
 class roomView(LoginRequiredMixin,View):
     def get(self,request):
         user = request.user

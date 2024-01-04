@@ -30,7 +30,7 @@ urlpatterns = [
     path('organization', OrganizationView.as_view(), name="organization"),
     path('save', Save.as_view(), name="save"),
     path('room', roomView.as_view(), name="room"),
-    # path('upload-photo', UploadPhoto.as_view(), name="upload_photo"),
+    path('map', MapView.as_view(), name="map"),
     # path('photo', PhotoView.as_view(), name="update_photo"),
     # path('photos', PhotoView.as_view(), name="photos"),
     
