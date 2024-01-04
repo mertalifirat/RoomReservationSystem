@@ -54,6 +54,7 @@ class Event(models.Model):
     eventDuration = models.IntegerField(default=0)
     eventWeekly = models.IntegerField(default=0)
     eventPermissions = models.CharField(max_length=100)
+    eventHours = models.CharField(max_length=100,default="")
 
 
              

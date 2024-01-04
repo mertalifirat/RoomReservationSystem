@@ -6,6 +6,7 @@ import json
 from json import JSONDecodeError
 from database import Database
 from room import Room
+from event import Event
 from user import User
 import hashlib
 import pickle
@@ -207,7 +208,7 @@ class RequestHandler(Thread):
                                 start = datetime.strptime(start_end[0], "%H:%M").time()
                                 end = datetime.strptime(start_end[1], "%H:%M").time()
                                 working_hours = (start,end)
-                                #Room with no permissions
+                                #Make permissions dictionary with {userId:[PERMISSIONS]}
                                 permissions = { client_user_id :request["room_permissions"]}
                                 room = Room(request["room_name"],0,0,int(request["room_capacity"]),working_hours,permissions)
                                 org.addRoom(room)
@@ -281,6 +282,7 @@ class RequestHandler(Thread):
                                         "event_capacity": str(org.getEvent(eventId).getCapacity()),
                                         "event_duration": str(org.getEvent(eventId).getDuration()),
                                         "event_weekly": str(org.getEvent(eventId).getWeekly()),
+                                        "event_hours": str(start) + " - " + str(end),
                                     })
                                     
                                 self.conn.send(str.encode(json.dumps(result)))
@@ -296,14 +298,18 @@ class RequestHandler(Thread):
                         if organization_id is None:
                             self.conn.send("Please attach to an organization first".encode("utf8"))
                         else:    
+                            #pdb.set_trace()
                             org = Server.organization_and_user_list.getOrganization(organization_id)
                             room_id = uuid.UUID(request["room_id"])
                             room = org.getRoom(room_id)
+                            #Creating event TODO: convert weekly to datetime, right now it is None
+                            permissions = { client_user_id :request["event_permissions"]}
+                            event = Event(request["event_title"],request["event_description"],request["event_category"],int(request["event_capacity"]),int(request["event_duration"]),None,permissions)
+                            org.addEvent(event)
                             #Check if user has permission to reserve room TODO:check for PERRESERVE permission
                             if "RESERVE" in room.getUserPermissions(client_user_id):
-                                event_id = uuid.UUID(request["event_id"])
-                                start = datetime.strptime(request["start"], '%Y-%m-%d-%H:%M')
-                                org.reserve(org.getEvent(event_id),room,start)
+                                start = datetime.strptime(request["event_start"], '%Y-%m-%d-%H:%M')
+                                org.reserve(event,room,start)
                                 self.conn.send(str.encode("Room reserved"))
                             else:
                                 self.conn.send("You don't have access for reserving the room".encode("utf8"))    
@@ -325,8 +331,8 @@ class RequestHandler(Thread):
                             #Check if user has permission to delete reservation and write to event TODO: check for org owner
                             if "DELETE" in room.getUserPermissions(client_user_id) and "WRITE" in event.getUserPermissions(client_user_id):
                                 roomEventList = org.getEventsReservedRoom(room_id)
-                                start = datetime.strptime(request["start"], '%Y-%m-%d-%H:%M')
-                                end = datetime.strptime(request["end"], '%Y-%m-%d-%H:%M')
+                                start = datetime.strptime(request["event_start"], '%Y-%m-%d-%H:%M')
+                                end = datetime.strptime(request["event_end"], '%Y-%m-%d-%H:%M')
                                 roomEventList.remove((event_id,start,end))
                                 org.updateRoomReservedByEvent(event_id,None)
                                 self.conn.send(str.encode("Reservation deleted"))

@@ -44,17 +44,17 @@ class RoomForm(forms.ModelForm):
             "roomPermissions",
         )
 class EventForm(forms.ModelForm):
-    title = forms.CharField()
-    description = forms.CharField()
-    category = forms.CharField()
-    capacity = forms.IntegerField()
-    duration = forms.IntegerField()
-    weekly = forms.IntegerField()
-    permissions = forms.MultipleChoiceField(
+    eventTitle = forms.CharField()
+    eventDescription = forms.CharField()
+    eventCategory = forms.CharField()
+    eventCapacity = forms.IntegerField()
+    eventDuration = forms.IntegerField()
+    eventWeekly = forms.IntegerField()
+    eventStart = forms.CharField() #Start format is: %Y-%m-%d-%H:%M
+    eventPermissions = forms.MultipleChoiceField(
         choices=[
-            ("LIST", "LIST"),
-            ("DELETE", "DELETE"),
-            ("ADD", "ADD"),
+            ("READ", "READ"),
+            ("WRITE", "WRITE"),
         ],
         widget=forms.CheckboxSelectMultiple,
         required=False,
@@ -63,11 +63,11 @@ class EventForm(forms.ModelForm):
     class Meta:
         model = Event
         fields = (
-            "title",
-            "description",
-            "category",
-            "capacity",
-            "duration",
-            "weekly",
-            "permissions",
+            "eventTitle",
+            "eventDescription",
+            "eventCategory",
+            "eventCapacity",
+            "eventDuration",
+            "eventWeekly",
+            "eventPermissions",
          )        

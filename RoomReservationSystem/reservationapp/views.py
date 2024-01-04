@@ -14,6 +14,7 @@ from .models import *
 from rest_framework.authtoken.models import Token
 import socket
 from . import constants
+from datetime import datetime
 
 import os
 from .forms import EventForm, RoomForm, UserForm
@@ -158,8 +159,8 @@ class OrganizationView(LoginRequiredMixin,View):
     def get(self,request):
         user = request.user
         user_authenticated = user.is_authenticated
-        selectedOrgServerId = request.POST.get('orgServerId')
-        selectedOrgName = request.POST.get('orgName')
+        selectedOrgServerId = request.GET.get('orgServerId')
+        selectedOrgName = request.GET.get('orgName')
         #print(request)
         return render(request, 'organization.html', {'user_authenticated': user_authenticated,
                                                      'selectedOrgServerId': selectedOrgServerId,
@@ -226,10 +227,14 @@ class OrganizationView(LoginRequiredMixin,View):
             #Go to room page
             selectedRoomId = request.POST.get('roomServerId')
             selectedRoomName = request.POST.get('roomName')
+            selectedOrgServerId = request.POST.get('orgServerId')
+            selectedOrgName = request.POST.get('orgName')
             form = EventForm()
             return render(request, 'room.html', {
                                                     'form': form,
                                                     'user_authenticated': user_authenticated,
+                                                    'selectedOrgServerId': selectedOrgServerId,
+                                                    'selectedOrgName': selectedOrgName,
                                                     'selectedRoomServerId': selectedRoomId,
                                                     'selectedRoomName': selectedRoomName,})
 class roomView(LoginRequiredMixin,View):
@@ -238,15 +243,21 @@ class roomView(LoginRequiredMixin,View):
         user_authenticated = user.is_authenticated
         selectedRoomServerId = request.POST.get('roomServerId')
         selectedRoomName = request.POST.get('roomName')
+        selectedOrgServerId = request.POST.get('orgServerId')
+        selectedOrgName = request.POST.get('orgName')
         form = EventForm()
         #print(request)
         return render(request, 'room.html', {'user_authenticated': user_authenticated,
                                              'form': form,
+                                             'selectedOrgServerId': selectedOrgServerId,
+                                             'selectedOrgName': selectedOrgName,
                                              'selectedRoomServerId': selectedRoomServerId,
                                              'selectedRoomName': selectedRoomName,})
     def post(self,request):
         user = request.user
         user_authenticated = user.is_authenticated
+        selectedOrgServerId = request.POST.get('orgServerId')
+        selectedOrgName = request.POST.get('orgName')
         selectedRoomServerId = request.POST.get('roomServerId')
         selectedRoomName = request.POST.get('roomName')
 
@@ -257,18 +268,77 @@ class roomView(LoginRequiredMixin,View):
                 "room_id": selectedRoomServerId,
             }
             events = json.loads(clientManager.getClient(user.id).make_request(serverRequest))
+            eventHours = {}
             print(events)
             for event in events:
-                Event.objects.get_or_create(eventId = event["event_id"],eventTitle=event["event_title"], eventCategory=event["event_category"], eventDescription=event["event_description"])
+                Event.objects.get_or_create(eventId = event["event_id"],eventTitle=event["event_title"], eventCategory=event["event_category"], eventDescription=event["event_description"],eventHours=event["event_hours"])
             eventCollections = list(Event.objects.filter().only('eventTitle', 'eventCategory', 'eventDescription'))
             form = EventForm()
             return render(request, 'room.html', {
                                                     'user_authenticated': user_authenticated,
                                                     'form': form,
+                                                    'selectedOrgServerId': selectedOrgServerId,
+                                                    'selectedOrgName': selectedOrgName,
                                                     'selectedRoomServerId': selectedRoomServerId,
                                                     'selectedRoomName': selectedRoomName,
-                                                    'events': eventCollections})
-            
+                                                    'events': eventCollections,
+                                                    'eventHours': eventHours})
+        if request.POST.get('reserveRoom'):
+            form = EventForm(request.POST)
+            #pdb.set_trace()
+            #Create request
+            if form.is_valid():
+                serverRequest = {
+                    "command": "RESERVE",
+                    "room_id": selectedRoomServerId,
+                    "event_title": form.cleaned_data['eventTitle'],
+                    "event_category": form.cleaned_data['eventCategory'],
+                    "event_description": form.cleaned_data['eventDescription'],
+                    "event_capacity": form.cleaned_data['eventCapacity'],
+                    "event_duration": form.cleaned_data['eventDuration'],
+                    "event_weekly": form.cleaned_data['eventWeekly'],
+                    "event_permissions": form.cleaned_data['eventPermissions'],
+                    "event_start": form.cleaned_data['eventStart'],
+                }
+                print(clientManager.getClient(user.id).make_request(serverRequest))
+                form = EventForm()
+                return render(request, 'room.html', {
+                                                        'user_authenticated': user_authenticated,
+                                                        'form': form,
+                                                        'selectedOrgServerId': selectedOrgServerId,
+                                                        'selectedOrgName': selectedOrgName,
+                                                        'selectedRoomServerId': selectedRoomServerId,
+                                                        'selectedRoomName': selectedRoomName,})
+        if request.POST.get('deleteReservation'):
+            #Create request
+            eventHours = request.POST.get('eventHours')
+            print(eventHours)
+            eventHours = eventHours.split(" - ")
+            print(eventHours)
+            eventStart = datetime.strptime(eventHours[0], '%Y-%m-%d %H:%M:%S')
+            eventEnd = datetime.strptime(eventHours[1], '%Y-%m-%d %H:%M:%S')
+            eventStart = eventStart.strftime("%Y-%m-%d-%H:%M")
+            eventEnd = eventEnd.strftime("%Y-%m-%d-%H:%M")
+            print(eventStart)
+            print(eventEnd)
+            serverRequest = {
+                "command": "DELETE_RESERVATION",
+                "room_id": selectedRoomServerId,
+                "event_id": request.POST.get('eventServerId'),
+                "event_start": eventStart,
+                "event_end": eventEnd,
+            }
+            print(clientManager.getClient(user.id).make_request(serverRequest))
+            Event.objects.filter(eventId = request.POST.get('eventServerId')).delete()
+            form = EventForm()
+            return render(request, 'room.html', {
+                                                    'user_authenticated': user_authenticated,
+                                                    'form': form,
+                                                    'selectedOrgServerId': selectedOrgServerId,
+                                                    'selectedOrgName': selectedOrgName,
+                                                    'selectedRoomServerId': selectedRoomServerId,
+                                                    'selectedRoomName': selectedRoomName,})    
+                
             
         
 

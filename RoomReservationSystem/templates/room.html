@@ -33,6 +33,23 @@
                       <h3 style="margin-top:100px">Event name: {{ event.eventTitle }}</h3>
                       <p> <b> Category: {{ event.eventCategory}} </b></p>
                       <p> <b> Description: {{ event.eventDescription}} </b></p>
+                      <p> <b> Start time: {{ event.eventHours}} </b></p>
+                      <form action="{% url 'reservationapp:room' %}" class="room" method="post" >
+                        {% csrf_token %}
+                        <input type="hidden" name="roomServerId" value="{{ selectedRoomServerId }}">
+                        <input type="hidden" name="roomName" value="{{ selectedRoomName }}">
+                        <input type="hidden" name="listReservedEvents" value="true">
+                        <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Event Info</Button>
+                      </form>
+                      <form action="{% url 'reservationapp:room' %}" class="room" method="post" >
+                        {% csrf_token %}
+                        <input type="hidden" name="roomServerId" value="{{ selectedRoomServerId }}">
+                        <input type="hidden" name="roomName" value="{{ selectedRoomName }}">
+                        <input type="hidden" name="eventServerId" value="{{ event.eventId }}">
+                        <input type="hidden" name="eventHours" value="{{ event.eventHours }}">
+                        <input type="hidden" name="deleteReservation" value="true">
+                        <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Delete Event</Button>
+                      </form>  
                       
                     {% endfor %}
 
@@ -40,10 +57,18 @@
                     {% endif %}
                     <form action="{% url 'reservationapp:room' %}" class="room" method="post" >
                         {% csrf_token %}
+                        <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
+                        <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
                         <input type="hidden" name="roomServerId" value="{{ selectedRoomServerId }}">
                         <input type="hidden" name="roomName" value="{{ selectedRoomName }}">
                         <input type="hidden" name="listReservedEvents" value="true">
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">List Events</Button>
+                    </form> 
+                    <form action="{% url 'reservationapp:organization' %}" class="organization" method="get" >
+                      {% csrf_token %}
+                      <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
+                      <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                      <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Back</Button>
                     </form> 
                     
                     <div style="display: flex; justify-content: flex-end;">
@@ -51,6 +76,10 @@
                           <form action="{% url 'reservationapp:room' %}" class="room" method="post">
                             {% csrf_token %}
                             {{form}}
+                            <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
+                            <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                            <input type="hidden" name="roomServerId" value="{{ selectedRoomServerId }}">
+                            <input type="hidden" name="roomName" value="{{ selectedRoomName }}">
                             <input type="hidden" name="reserveRoom" value="true">
                             <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Reserve Room</Button>
                           </form>
