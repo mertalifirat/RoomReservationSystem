@@ -80,7 +80,7 @@ class Organization:
         self.roomList[room.getId()] = [
             room,
             [],
-        ]  # First item is room object, second is list (eventId,start,end) of FUTURE WORK {eventId: "asdadads",startdatetime: "2022.2.2.2.2",enddatetime:"2022.2.2.3.2"}
+        ]  # First item is room object, second is list (eventId,start,end)
 
     def addEvent(self, event):
         self.eventList[event.getId()] = [
@@ -286,7 +286,12 @@ class Organization:
                     # Updating event room
                     self.getRoomReservedByEvent[event.getId()]  = room.getId()
 
-    # Needs to be changed
+     
+     # First item is room object, second is list (eventId,start,end)
+     # First item is event object, second is roomId that event is reserved
+    # org.query((0,0,300,300), None, 'concert', 'BMB')
+    # org.query((100,100,200,200), 'AI', NONE')
+    # returns (eventTitle,eventDescription,eventCategory,room,start) tuples        
     def query(self, title, category, rect=None, room=None):
         queryResult = []
         roomResult = []
@@ -298,31 +303,66 @@ class Organization:
         if rect != None:
             x, y, w, h = rect
             # Matching rooms with given rectangle
-            for _, value in self.roomList.items():
-                if (
-                    value[0].getX() >= x
-                    and value[0].getX() <= x + w
-                    and value[0].getY() >= y
-                    and value[0].getY() <= y + h
-                ):
-                    # Append room,[(eventId,starttime,endtime)]
-                    roomResult.append(value)
-            for event in eventResult:
-                for roomValue in roomResult:
-                    start = roomValue[0].getWorkingHours()[0]
-                    end = start + time(0, event.getDuration())
+            if room == None:
+                for _, value in self.roomList.items():
                     if (
-                        self.isRoomAvailableBetweenHours(roomValue[0], start, end)
-                        and value[0].getCapacity() >= event.getCapacity()
+                        value[0].getX() >= x
+                        and value[0].getX() <= x + w
+                        and value[0].getY() >= y
+                        and value[0].getY() <= y + h
                     ):
-                        queryResult.append((event, value, start))
-        elif room != None:
-            start = room.getWorkingHours()[0]
-            for event in eventResult:
-                end = start + time(0, event.getDuration())
-                if (
-                    self.isRoomAvailableBetweenHours(room, start, end)
-                    and value[0].getCapacity() >= event.getCapacity()
-                ):
-                    queryResult.append((event, room, start))
+                        # Append (room,[(eventId,starttime,endtime)])
+                        roomResult.append(value)
+            #Checking room name too, if room is given
+            else:
+                for _, value in self.roomList.items():
+                    if (
+                        value[0].getX() >= x
+                        and value[0].getX() <= x + w
+                        and value[0].getY() >= y
+                        and value[0].getY() <= y + h
+                        and value[0].getName() == room
+                    ):
+                        # Append (room,[(eventId,starttime,endtime)])
+                        roomResult.append(value)
+        else:
+            # Matching rooms with given room name
+            for _, value in self.roomList.items():
+                if value[0].getName() == room:
+                    roomResult.append(value)                
+        #pdb.set_trace()
+        for event in eventResult:
+            for room in roomResult:
+                #Check room has reservations
+                if room[1] != []:
+                    if event.getId() == room[1][0][0]:
+                        queryResult.append((event.getTitle(),event.getDescription(),event.getCategory(),room[0].getName(),str(room[1][0][1])))
         return queryResult
+    
+    #Day view
+    # First item is room object, second is list (eventId,start,end)
+    # '%Y-%m-%d-%H:%M' date format
+    def getEventsByDays(self):
+        events = {}
+        for _,room in self.getRoomList().items():
+            for eventId,start,end in room[1]:
+                if start.strftime("%Y-%m-%d") in events.keys():
+                    events[start.strftime("%Y-%m-%d")].append(self.getEvent(eventId).getTitle())
+                else:
+                    events[start.strftime("%Y-%m-%d")] = [self.getEvent(eventId).getTitle()]
+        return events
+
+    #Room view
+    # First item is room object, second is list (eventId,start,end)
+    # '%Y-%m-%d-%H:%M' date format
+    def getEventsByRooms(self):
+        events = {}
+        for _,room in self.getRoomList().items():
+            for eventId,start,end in room[1]:
+                if room[0].getName() in events.keys():
+                    events[room[0].getName()].append(self.getEvent(eventId).getTitle())
+                else:
+                    events[room[0].getName()] = [self.getEvent(eventId).getTitle()]
+        return events                        
+            
+

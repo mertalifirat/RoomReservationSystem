@@ -1,0 +1,55 @@
+{% extends 'index.html' %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'css/my_profile.css' %}?v1.3">
+{#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>#}
+  <title>Organization Page</title>
+
+{% endblock %}
+<style>
+  .form-right{
+    width: 300px;
+    margin-right: 20px;
+    margin-top: 10px;
+  }
+</style>
+
+{% block content %}
+  <li class="selected">
+    <div class="cd-full-width">
+      <div class="container-fluid js-tm-page-content tm-page-pad" data-page-no="5" data-page-type="gallery">
+                <br><br><br>
+                <div class="container">
+                    {% if user_authenticated %}
+                    <h1 style="font-size: 32px; margin-bottom: 8px">Room Organization: {{ selectedOrgName }}</h1>  
+                      {% if events %}
+                        {%for key,value in events.items %}
+                          <p> <b> {{key}}</b></p>
+                          {%for event in value%}
+                          <p> <b> {{event}}</b></p>
+                          {%endfor%}
+                        {% endfor %}
+                      {% endif %}     
+                    {% endif %}
+                </div>
+                <form action="{% url 'reservationapp:roomView' %}" class="roomView" method="post" >
+                    {% csrf_token %}
+                    <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
+                    <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                    <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">List Events</Button>
+                </form> 
+                <form action="{% url 'reservationapp:event' %}" class="event" method="get" >
+                    {% csrf_token %}
+                    <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
+                    <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                    <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Back</Button>
+                </form> 
+            </div>
+        </div>
+    </li>
+
+
+{% endblock %}

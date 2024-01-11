@@ -17,7 +17,7 @@ from . import constants
 from datetime import datetime
 
 import os
-from .forms import EventForm, RoomForm, UserForm
+from .forms import EventForm, QueryForm, RoomForm, UserForm
 
 clientManager = ClientManager()
 
@@ -181,7 +181,7 @@ class OrganizationView(LoginRequiredMixin,View):
             for room in rooms:
                 #pdb.set_trace()
                 Room.objects.get_or_create(roomId = room["room_id"],roomName=room["room_name"], roomCapacity=room["room_capacity"], roomWorkingHours=room["room_working_hours"])
-            roomCollections = list(Room.objects.filter().only('roomName', 'roomCapacity', 'roomWorkingHours'))
+            roomCollections = list(Room.objects.filter().only('roomId','roomName', 'roomCapacity', 'roomWorkingHours'))
             form = RoomForm()
             return render(request, 'organization.html', {
                                                     'form': form,
@@ -348,7 +348,96 @@ class roomView(LoginRequiredMixin,View):
                                                     'selectedOrgServerId': selectedOrgServerId,
                                                     'selectedOrgName': selectedOrgName,
                                                     'selectedRoomServerId': selectedRoomServerId,
-                                                    'selectedRoomName': selectedRoomName,})    
+                                                    'selectedRoomName': selectedRoomName,})
+
+class EventView(LoginRequiredMixin,View):
+    def get(self,request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        selectedOrgServerId = request.GET.get('orgServerId')
+        selectedOrgName = request.GET.get('orgName')
+        form = QueryForm()
+        return render(request, 'event.html', {'user_authenticated': user_authenticated,
+                                             'selectedOrgServerId': selectedOrgServerId,
+                                             'selectedOrgName': selectedOrgName,
+                                             'form': form,})
+    def post(self,request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        selectedOrgServerId = request.POST.get('orgServerId')
+        selectedOrgName = request.POST.get('orgName')
+        form = QueryForm(request.POST)
+
+        if form.is_valid():
+            #Create request
+            rect = (form.cleaned_data['X1'], form.cleaned_data['Y1'], form.cleaned_data['X2'], form.cleaned_data['Y2'])
+            serverRequest = {
+                "command": "QUERY",
+                "rect": rect,
+                "title": form.cleaned_data['title'],
+                "category": form.cleaned_data['category'],
+                "room": form.cleaned_data['room'],
+            }
+            # list of tuples (event,room,start) 
+            queryResult = json.loads(clientManager.getClient(user.id).make_request(serverRequest))
+            print(queryResult)
+            form = QueryForm()
+            return render(request, 'event.html', {
+                                                    'user_authenticated': user_authenticated,
+                                                    'form': form,
+                                                    'selectedOrgServerId': selectedOrgServerId,
+                                                    'selectedOrgName': selectedOrgName,
+                                                    'queryResult': queryResult,})    
+class DayView(LoginRequiredMixin,View):
+    def get(self,request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        selectedOrgServerId = request.GET.get('orgServerId')
+        selectedOrgName = request.GET.get('orgName')
+        return render(request, 'dayView.html', {'user_authenticated': user_authenticated,
+                                             'selectedOrgServerId': selectedOrgServerId,
+                                             'selectedOrgName': selectedOrgName,})
+    def post(self,request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        selectedOrgServerId = request.POST.get('orgServerId')
+        selectedOrgName = request.POST.get('orgName')
+        #Create request
+        serverRequest = {
+            "command": "DAY_VIEW",
+        }
+        dayViewResult = json.loads(clientManager.getClient(user.id).make_request(serverRequest))
+        print(dayViewResult)
+        return render(request, 'dayView.html', {'user_authenticated': user_authenticated,
+                                             'selectedOrgServerId': selectedOrgServerId,
+                                             'selectedOrgName': selectedOrgName,
+                                             'events':dayViewResult,})
+    
+
+class RoomView(LoginRequiredMixin,View):
+    def get(self,request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        selectedOrgServerId = request.GET.get('orgServerId')
+        selectedOrgName = request.GET.get('orgName')
+        return render(request, 'roomView.html', {'user_authenticated': user_authenticated,
+                                             'selectedOrgServerId': selectedOrgServerId,
+                                             'selectedOrgName': selectedOrgName,})
+    def post(self,request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        selectedOrgServerId = request.POST.get('orgServerId')
+        selectedOrgName = request.POST.get('orgName')
+        #Create request
+        serverRequest = {
+            "command": "ROOM_VIEW",
+        }
+        roomViewResult = json.loads(clientManager.getClient(user.id).make_request(serverRequest))
+        print(roomViewResult)
+        return render(request, 'roomView.html', {'user_authenticated': user_authenticated,
+                                             'selectedOrgServerId': selectedOrgServerId,
+                                             'selectedOrgName': selectedOrgName,
+                                             'events':roomViewResult,})               
                 
             
         

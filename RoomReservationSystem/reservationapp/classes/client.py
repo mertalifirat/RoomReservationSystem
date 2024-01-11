@@ -102,7 +102,20 @@ class Client:
             elif request_type == "DELETE_EVENT":
                 
                 self.request_sock.send(str.encode(json.dumps(request)))
-                return(self.request_sock.recv(1024).decode("utf8"))                   
+                return(self.request_sock.recv(1024).decode("utf8"))
+            elif request_type == "QUERY":
+                    
+                    self.request_sock.send(str.encode(json.dumps(request)))
+                    return(self.request_sock.recv(4096).decode("utf8"))
+
+            elif request_type == "DAY_VIEW":
+                    
+                    self.request_sock.send(str.encode(json.dumps(request)))
+                    return(self.request_sock.recv(4096).decode("utf8"))
+            elif request_type == "ROOM_VIEW":
+                        
+                    self.request_sock.send(str.encode(json.dumps(request)))
+                    return(self.request_sock.recv(4096).decode("utf8"))                   
             elif request_type == "LOGOUT":
                 
                 self.request_sock.send(str.encode(json.dumps(request)))

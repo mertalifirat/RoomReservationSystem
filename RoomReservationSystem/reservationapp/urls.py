@@ -31,11 +31,7 @@ urlpatterns = [
     path('save', Save.as_view(), name="save"),
     path('room', roomView.as_view(), name="room"),
     path('map', MapView.as_view(), name="map"),
-    # path('photo', PhotoView.as_view(), name="update_photo"),
-    # path('photos', PhotoView.as_view(), name="photos"),
-    
-    # path('collection/<int:id>', CollectionDetail.as_view(), name="collection_detail"),
-    # path('views', Filter.as_view(), name="views"),
-    # path('view/<int:id>', FilterViewDetail.as_view(), name="view_detail"),
-
+    path('event', EventView.as_view(), name="event"),
+    path('dayView', DayView.as_view(), name="dayView"),
+    path('roomView', RoomView.as_view(), name="roomView"),
 ]

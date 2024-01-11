@@ -75,7 +75,7 @@
                         <div class="form-right">
                           <form action="{% url 'reservationapp:room' %}" class="room" method="post">
                             {% csrf_token %}
-                            {{form}}
+                            {{form.as_p}}
                             <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
                             <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
                             <input type="hidden" name="roomServerId" value="{{ selectedRoomServerId }}">

@@ -1,0 +1,81 @@
+{% extends 'index.html' %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'css/my_profile.css' %}?v1.3">
+{#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>#}
+  <title>Organization Page</title>
+
+{% endblock %}
+<style>
+  .form-right{
+    width: 300px;
+    margin-right: 20px;
+    margin-top: 10px;
+  }
+</style>
+
+{% block content %}
+  <li class="selected">
+    <div class="cd-full-width">
+      <div class="container-fluid js-tm-page-content tm-page-pad" data-page-no="5" data-page-type="gallery">
+                <br><br><br>
+                <div class="container">
+                    {% if user_authenticated %}
+                        <form action="{% url 'reservationapp:event' %}" class="event" method="post" >
+                            {% csrf_token %}
+                            {{form.as_p}}
+                            <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
+                            <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                            <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Search Events</Button>
+                        </form> 
+                        
+                        <div style="display: flex; justify-content: flex-end;"></div>
+                          <div class="form-right">
+                            <form action="{% url 'reservationapp:dayView' %}" class="dayView" method="get">
+                              {% csrf_token %}
+                              <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
+                              <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                              <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Events by Days</Button>
+                            </form>
+                          </div>
+                        </div> 
+
+                        <div style="display: flex; justify-content: flex-end;"></div>
+                          <div class="form-right">
+                            <form action="{% url 'reservationapp:roomView' %}" class="roomView" method="get">
+                              {% csrf_token %}
+                              <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
+                              <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                              <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Events by Rooms</Button>
+                            </form>
+                          </div>
+                        </div>
+                        
+                        <form action="{% url 'reservationapp:organization' %}" class="organization" method="get" >
+                          {% csrf_token %}
+                          <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
+                          <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                          <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Back</Button>
+                        </form>  
+                        {% if queryResult %}
+                            <div class="row">
+                                {% for eventTitle,eventDescription,eventCategory,room,start in queryResult %}
+                                    <h3 style="margin-top:100px">Event title: {{ eventTitle }}</h3>
+                                    <p> <b> Category: {{ eventCategory}} </b></p>
+                                    <p> <b> Description: {{ eventDescription}} </b></p>
+                                    <p> <b> Room: {{ room}} </b></p>
+                                    <p> <b> Start time: {{ start}} </b></p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </li>
+
+
+{% endblock %}

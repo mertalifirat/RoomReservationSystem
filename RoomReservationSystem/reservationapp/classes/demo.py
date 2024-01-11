@@ -22,7 +22,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         0,
         30,
         (time(8, 0), time(18, 0)),
-        {uuid.UUID("4629710e-d299-42da-a3e6-09f40b79e356"):["LIST","RESERVE","DELETE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]},
+        {uuid.UUID("4629710e-d299-42da-a3e6-09f40b79e356ca"):["LIST","RESERVE","DELETE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]},
     )
     room2 = Room(
         "Room 2",

@@ -421,6 +421,52 @@ class RequestHandler(Thread):
                                     self.conn.send("You don't have access for deleting the event".encode("utf8"))        
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))                        
+            elif request_type == "QUERY":
+                with Server.mutex:
+                    if client_user_id is not None:
+                        organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
+
+                        if organization_id is None:
+                            self.conn.send("Please attach to an organization first".encode("utf8"))
+                        else:    
+                            org = Server.organization_and_user_list.getOrganization(organization_id)
+                            title = request["title"]
+                            category = request["category"]
+                            rect = request["rect"]
+                            room = request["room"]
+                            result = org.query(title,category,rect,room)
+                            #pdb.set_trace()
+                            self.conn.send(str.encode(json.dumps(result)))   
+                    else:
+                        self.conn.send("Not authorized, please login".encode("utf8"))
+            elif request_type == "DAY_VIEW":
+                with Server.mutex:
+                    if client_user_id is not None:
+                        organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
+
+                        if organization_id is None:
+                            self.conn.send("Please attach to an organization first".encode("utf8"))
+                        else:    
+                            org = Server.organization_and_user_list.getOrganization(organization_id)
+                            result = org.getEventsByDays()
+                            self.conn.send(str.encode(json.dumps(result)))   
+                    else:
+                        self.conn.send("Not authorized, please login".encode("utf8"))
+
+            elif request_type == "ROOM_VIEW":
+                with Server.mutex:
+                    if client_user_id is not None:
+                        organization_id = Server.organization_and_user_list.getUser(client_user_id).get_attachedOrganization()
+
+                        if organization_id is None:
+                            self.conn.send("Please attach to an organization first".encode("utf8"))
+                        else:    
+                            org = Server.organization_and_user_list.getOrganization(organization_id)
+                            result = org.getEventsByRooms()
+                            self.conn.send(str.encode(json.dumps(result)))   
+                    else:
+                        self.conn.send("Not authorized, please login".encode("utf8"))            
+
             elif request_type == "LOGOUT": #Logout
                 with Server.mutex:
                     if client_user_id is not None:

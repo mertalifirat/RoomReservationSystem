@@ -70,4 +70,13 @@ class EventForm(forms.ModelForm):
             "eventDuration",
             "eventWeekly",
             "eventPermissions",
-         )        
+         )
+
+class QueryForm(forms.Form):
+    X1 = forms.IntegerField()
+    Y1 = forms.IntegerField()
+    X2 = forms.IntegerField()
+    Y2 = forms.IntegerField()
+    title = forms.CharField()
+    category = forms.CharField()
+    room = forms.CharField()
