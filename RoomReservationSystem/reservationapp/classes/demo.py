@@ -11,42 +11,71 @@ from datetime import datetime
 import pickle
 from singletonCatalgoue import Catalogue
 
-#{uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"):["LIST","RESERVE","DELETE"],uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]}
+
+# {uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"):["LIST","RESERVE","DELETE"],uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]}
 class RoomReservationSystemDemo(cmd.Cmd):
     intro = "Welcome to the Demo of the Room Reservation System. Type help or ? to list commands.\n"
     # simple data
 
     room1 = Room(
         "Room 1",
-        0,
-        0,
+        39.89413109880857,
+        32.77663707733155,
         30,
         (time(8, 0), time(18, 0)),
-        {uuid.UUID("4629710e-d299-42da-a3e6-09f40b79e356ca"):["LIST","RESERVE","DELETE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]},
+        {
+            uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"): [
+                "LIST",
+                "RESERVE",
+                "DELETE",
+            ],
+            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["DELETE"],
+        },
     )
     room2 = Room(
         "Room 2",
-        1,
-        0,
+        39.89513109880857,
+        32.77763707733155,
         20,
         (time(8, 0), time(18, 0)),
-        {uuid.UUID("4629710e-d299-42da-a3e6-09f40b79e356"):["LIST","RESERVE","DELETE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]},
+        {
+            uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"): [
+                "LIST",
+                "RESERVE",
+                "DELETE",
+            ],
+            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["DELETE"],
+        },
     )
     room3 = Room(
         "Room 3",
-        0,
-        1,
+        39.89613109880857,
+        32.77863707733155,
         30,
         (time(8, 0), time(18, 0)),
-        {uuid.UUID("4629710e-d299-42da-a3e6-09f40b79e356"):["LIST","RESERVE","DELETE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]},
+        {
+            uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"): [
+                "LIST",
+                "RESERVE",
+                "DELETE",
+            ],
+            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["DELETE"],
+        },
     )
     room4 = Room(
         "Room 4",
-        1,
-        1,
+        39.89713109880857,
+        32.77963707733155,
         40,
         (time(8, 0), time(18, 0)),
-        {uuid.UUID("4629710e-d299-42da-a3e6-09f40b79e356"):["LIST","RESERVE","DELETE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]},
+        {
+            uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"): [
+                "LIST",
+                "RESERVE",
+                "DELETE",
+            ],
+            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["DELETE"],
+        },
     )
 
     event1 = Event(
@@ -57,7 +86,10 @@ class RoomReservationSystemDemo(cmd.Cmd):
         60,
         None,
         # datetime(2022,2,1),
-        {uuid.UUID("4629710e-d299-42da-a3e6-09f40b79e356"):["READ","WRITE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["READ"]},
+        {
+            uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"): ["READ", "WRITE"],
+            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["READ"],
+        },
     )
     event2 = Event(
         "Event 2",
@@ -66,7 +98,10 @@ class RoomReservationSystemDemo(cmd.Cmd):
         20,
         70,
         None,
-        {uuid.UUID("4629710e-d299-42da-a3e6-09f40b79e356"):["READ","WRITE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["READ"]},
+        {
+            uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"): ["READ", "WRITE"],
+            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["READ"],
+        },
     )
     event3 = Event(
         "Event 3",
@@ -75,23 +110,56 @@ class RoomReservationSystemDemo(cmd.Cmd):
         30,
         60,
         None,
-        {uuid.UUID("4629710e-d299-42da-a3e6-09f40b79e356"):["READ","WRITE"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["READ"]},
+        {
+            uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"): ["READ", "WRITE"],
+            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["READ"],
+        },
     )
 
-    map = [[None for _ in range(3)] for _ in range(3)]
+    # map = [[None for _ in range(3)] for _ in range(3)]
 
     organization = Organization(
-        "Doruk", "Organization 1", map ,{uuid.UUID("4629710e-d299-42da-a3e6-09f40b79e356") : ["LIST","ADD","ACCESS"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748") : ["ACCESS"]}
+        "Doruk",
+        "Organization 1",
+        map,
+        {
+            uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"): [
+                "LIST",
+                "ADD",
+                "ACCESS",
+            ],
+            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["ACCESS"],
+        },
     )  # Create a 2D array with None values
 
     organization2 = Organization(
-        "Mert", "Organization 2", map ,{uuid.UUID("4629710e-d299-42da-a3e6-09f40b79e356") : ["LIST","ADD","ACCESS"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748") : ["ACCESS"]}
+        "Mert",
+        "Organization 2",
+        map,
+        {
+            uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"): [
+                "LIST",
+                "ADD",
+                "ACCESS",
+            ],
+            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["ACCESS"],
+        },
     )  # Create a 2D array with None values
 
     organization3 = Organization(
-        "Ece", "Organization 3", map ,{uuid.UUID("4629710e-d299-42da-a3e6-09f40b79e356") : ["LIST","ADD","ACCESS"], uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748") : ["ACCESS"]}
+        "Ece",
+        "Organization 3",
+        map,
+        {
+            uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"): [
+                "LIST",
+                "ADD",
+                "ACCESS",
+            ],
+            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["ACCESS"],
+        },
     )  # Create a 2D array with None values
-    
+
     eventList = [event1, event2, event3]
     organization.addRoom(room1)
     organization.addRoom(room2)
@@ -102,21 +170,22 @@ class RoomReservationSystemDemo(cmd.Cmd):
     organization.addEvent(event2)
     organization.addEvent(event3)
 
-    user1 = User("doruk","doruk@localhost.com","doruko","mert1234")
-    user1.update_userId(uuid.UUID("4629710e-d299-42da-a3e6-09f40b79e356"))
+    user1 = User("doruk", "doruk@localhost.com", "doruko", "mert1234")
+    user1.update_userId(uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"))
 
     catalogue = Catalogue()
     catalogue.addUser(user1)
     catalogue.addOrganization(organization)
     catalogue.addOrganization(organization2)
     catalogue.addOrganization(organization3)
-    
+
     view = View("Doruk")
+
     def __del__(self):
         print("Server shutdown, file saved")
         print(self.catalogue.getOrganizationList())
         print(self.catalogue.getUserList())
-        pickle.dump(self.catalogue,open("organizations.p","wb"))
+        pickle.dump(self.catalogue, open("organizations.p", "wb"))
 
     def do_add_room(self, arg):
         """Add a room to the organization: add_room name x y capacity start end permissions"""

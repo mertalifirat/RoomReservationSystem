@@ -18,20 +18,22 @@ from django.contrib import admin
 from django.urls import path
 
 from .views import *
-app_name = 'reservationapp'
+
+app_name = "reservationapp"
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('home', Home.as_view(), name="home"),
-    path('login', Login.as_view(), name="login"),
-    path('logout', Logout.as_view(), name="logout"),
-    path('sign-up', SignUp.as_view(), name="signup"),
-    path('list-organizations', ListOrganizations.as_view(), name="list-organizations"),
-    path('organization', OrganizationView.as_view(), name="organization"),
-    path('save', Save.as_view(), name="save"),
-    path('room', roomView.as_view(), name="room"),
-    path('map', MapView.as_view(), name="map"),
-    path('event', EventView.as_view(), name="event"),
-    path('dayView', DayView.as_view(), name="dayView"),
-    path('roomView', RoomView.as_view(), name="roomView"),
+    path("admin/", admin.site.urls),
+    path("home", Home.as_view(), name="home"),
+    path("login", Login.as_view(), name="login"),
+    path("logout", Logout.as_view(), name="logout"),
+    path("sign-up", SignUp.as_view(), name="signup"),
+    path("list-organizations", ListOrganizations.as_view(), name="list-organizations"),
+    path("organization", OrganizationView.as_view(), name="organization"),
+    path("save", Save.as_view(), name="save"),
+    path("room", roomView.as_view(), name="room"),
+    path("map", MapView.as_view(), name="map"),
+    path("event", EventView.as_view(), name="event"),
+    path("dayView", DayView.as_view(), name="dayView"),
+    path("roomView", RoomView.as_view(), name="roomView"),
+    path("add-room", AddRoomView.as_view(), name="add-room"),
 ]

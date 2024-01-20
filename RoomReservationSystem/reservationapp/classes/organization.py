@@ -6,30 +6,30 @@ from collections import OrderedDict
 import pdb
 from singletonCatalgoue import Catalogue
 
+
 class Organization:
-    
     # Create
-    def __init__(self, owner, name, map,permissions):
+    def __init__(self, owner, name, map, permissions):
         self.id = uuid.uuid4()
         self.owner = owner
         self.name = name
-        self.map = map
+        # self.map = map
         self.roomList = OrderedDict()
         self.eventList = OrderedDict()
-        #Permissions is dict that maps the users to room CRUD operations {user_id: [PermissionList]}
+        # Permissions is dict that maps the users to room CRUD operations {user_id: [PermissionList]}
         self.permissions = permissions
-        #Adding created organization to the org_list
-        #Catalogue.add(self)
+        # Adding created organization to the org_list
+        # Catalogue.add(self)
 
     def __repr__(self):
-        result = f"Organization name: {self.name} \n Organization owner: {self.owner} \n Organization map: {self.map}\n"
+        result = f"Organization name: {self.name} \n Organization owner: {self.owner} \n Organization \n"
 
         for key in self.roomList:
             result += f"{self.roomList[key]}\n"
         for key in self.eventList:
             result += f"{self.eventList[key]}\n"
         return result
-    
+
     def getOrganizationInfo(self):
         result = {
             "org_id": str(self.id),
@@ -37,26 +37,35 @@ class Organization:
             "org_name": self.name,
         }
         return result
- 
+
     def listObjects(self):
         return self.__repr__()
-    
+
     def listRooms(self):
         result = []
         for key in self.roomList:
-            result.append({
-                "room_id": str(self.roomList[key][0].getId()),
-                "room_name": self.roomList[key][0].getName(),
-                "room_capacity": self.roomList[key][0].getCapacity(),
-                "room_working_hours": self.roomList[key][0].getWorkingHours()[0].strftime("%H:%M") + " " + self.roomList[key][0].getWorkingHours()[1].strftime("%H:%M"),
-                
-            })
+            result.append(
+                {
+                    "room_id": str(self.roomList[key][0].getId()),
+                    "room_name": self.roomList[key][0].getName(),
+                    "room_capacity": self.roomList[key][0].getCapacity(),
+                    "room_working_hours": self.roomList[key][0]
+                    .getWorkingHours()[0]
+                    .strftime("%H:%M")
+                    + " "
+                    + self.roomList[key][0].getWorkingHours()[1].strftime("%H:%M"),
+                    "room_x": self.roomList[key][0].getX(),
+                    "room_y": self.roomList[key][0].getY(),
+                }
+            )
         return result
+
     def listEvents(self):
         result = ""
         for key in self.eventList:
             result += f"{self.eventList[key]}\n"
         return result
+
     def accessRoomsandEvents(self):
         result = ""
         for key in self.roomList:
@@ -64,7 +73,7 @@ class Organization:
         for key in self.eventList:
             result += f"{self.eventList[key]}\n"
         return result
-    
+
     # def attach(self,id):
     #     if id in self.roomList.keys():
     #         return self.roomList[id]
@@ -72,11 +81,11 @@ class Organization:
     #         return self.eventList[id]
     #     else:
     #         return None
-        
+
     def addRoom(self, room):
         x = room.getX()
         y = room.getY()
-        self.map[x][y] = room
+        # self.map[x][y] = room
         self.roomList[room.getId()] = [
             room,
             [],
@@ -98,8 +107,8 @@ class Organization:
     def getName(self):
         return self.name
 
-    def getMap(self):
-        return self.map
+    # def getMap(self):
+    #     return self.map
 
     def getRoomList(self):
         return self.roomList
@@ -112,24 +121,24 @@ class Organization:
 
     def getEvent(self, id):
         return self.eventList[id][0]
-    
+
     def getEventsReservedRoom(self, id):
         return self.roomList[id][1]
 
     def getRoomReservedByEvent(self, id):
         return self.eventList[id][1]
-    
+
     def getPermissions(self):
         return self.permissions
-    
+
     def getUserPermissions(self, user_id):
         return self.permissions.get(user_id)
-    
+
     # Update
     def updateOrganization(self, owner, name, map):
         self.owner = owner
         self.name = name
-        self.map = map
+        # self.map = map
 
     def updateOwner(self, owner):
         self.owner = owner
@@ -137,22 +146,26 @@ class Organization:
     def updateName(self, name):
         self.name = name
 
-    def updateMap(self, map):
-        self.map = map
+    # def updateMap(self, map):
+    #     self.map = map
 
     def updateRoom(self, id, name, x, y, capacity, working_hours, permissions):
-        self.map[room.getX()][room.getY()] = None
+        # self.map[room.getX()][room.getY()] = None
         room = self.getRoom(id)
         room.updateRoom(name, x, y, capacity, working_hours, permissions)
-        self.map[room.getX()][room.getY()] = room
+        # self.map[room.getX()][room.getY()] = room
 
-    def updateEvent(self, id, title, description, category, capacity, duration, weekly,permissions):
+    def updateEvent(
+        self, id, title, description, category, capacity, duration, weekly, permissions
+    ):
         event = self.getEvent(id)
-        event.updateEvent(title, description, category, capacity, duration, weekly,permissions)
+        event.updateEvent(
+            title, description, category, capacity, duration, weekly, permissions
+        )
 
     def updatePermissions(self, permissions):
         self.permissions = permissions
-    
+
     def updateUserPermissions(self, user_id, permissions):
         self.permissions[user_id] = permissions
 
@@ -160,7 +173,8 @@ class Organization:
         if room_id is None:
             self.eventList.get(id)[1] = None
         else:
-            self.eventList.get(id)[1] = room_id        
+            self.eventList.get(id)[1] = room_id
+
     # Delete
     def deleteEvent(self, id):
         event = self.eventList.pop(id)
@@ -181,7 +195,11 @@ class Organization:
             and room.getWorkingHours()[1] >= eventEndHourMinute
         ):
             # Check if there is no collisions with other events in the room
-            for eventId, reservedStartDateTime, reservedEndDateTime in self.getEventsReservedRoom(room.getId()):
+            for (
+                eventId,
+                reservedStartDateTime,
+                reservedEndDateTime,
+            ) in self.getEventsReservedRoom(room.getId()):
                 if (
                     eventEndDateTime <= reservedStartDateTime
                     or reservedEndDateTime <= eventStartDateTime
@@ -203,7 +221,9 @@ class Organization:
             if room.getCapacity() >= event.getCapacity():
                 # Check if event is weekly or not
                 if event.getWeekly() is None:
-                    self.getEventsReservedRoom(room.getId()).append((event.getId(), start, end))
+                    self.getEventsReservedRoom(room.getId()).append(
+                        (event.getId(), start, end)
+                    )
                     self.updateRoomReservedByEvent(event.getId(), room.getId())
                 # If event is weekly add event to the room reservation list for every week
                 # TODO: Check if room has PERWRITE permission
@@ -216,26 +236,24 @@ class Organization:
                         start += timedelta(days=7)
                         end += timedelta(days=7)
 
-    # Return available rooms iterator for the given event and rectangle
-    def findRoom(self, event, rect, start, end):
-        x, y, w, h = rect
-        available_rooms = []
+    # # Return available rooms iterator for the given event and rectangle
+    # def findRoom(self, event, rect, start, end):
+    #     x, y, w, h = rect
+    #     available_rooms = []
 
-        # Assuming top left and top right coordinates are not included
-        for i in range(w):
-            for j in range(h):
-                # Checking if there is a room in the given coordinates
-                if self.map[x + i][y + j] == None:
-                    continue
-                else:
-                    room = self.map[x + i][y + j]
-                    if (
-                        self.isRoomAvailableBetweenHours(start, end)
-                        and room.getCapacity() >= event.getCapacity()
-                    ):
-                        available_rooms.append(room)
+    #     # Assuming top left and top right coordinates are not included
+    #     for i in range(w):
+    #         for j in range(h):
+    #             # Checking if there is a room in the given coordinates
 
-        return iter(available_rooms)
+    #             room = self.map[x + i][y + j]
+    #             if (
+    #                 self.isRoomAvailableBetweenHours(start, end)
+    #                 and room.getCapacity() >= event.getCapacity()
+    #             ):
+    #                 available_rooms.append(room)
+
+    #     return iter(available_rooms)
 
     # Return a dictionary of keys are event ids and values are available rooms iterator for the given event list and rectangle
     def findSchedule(self, eventlist, rect, start, end):
@@ -247,7 +265,7 @@ class Organization:
     # Reassign the event to the room if room is available and conditions are satisfied
     def reassign(self, event, room):
         # Getting [room,[eventId,starttime,endttime]] of old room
-        oldRoomId = self.getRoomReservedByEvent[event.getId()] 
+        oldRoomId = self.getRoomReservedByEvent[event.getId()]
         # Check if the event is already reserved a room
         if oldRoomId is not None:
             oldRoomReservations = self.getEventsReservedRoom(oldRoomId)
@@ -284,14 +302,13 @@ class Organization:
                             starttime += timedelta(days=7)
                             endtime += timedelta(days=7)
                     # Updating event room
-                    self.getRoomReservedByEvent[event.getId()]  = room.getId()
+                    self.getRoomReservedByEvent[event.getId()] = room.getId()
 
-     
-     # First item is room object, second is list (eventId,start,end)
-     # First item is event object, second is roomId that event is reserved
+    # First item is room object, second is list (eventId,start,end)
+    # First item is event object, second is roomId that event is reserved
     # org.query((0,0,300,300), None, 'concert', 'BMB')
     # org.query((100,100,200,200), 'AI', NONE')
-    # returns (eventTitle,eventDescription,eventCategory,room,start) tuples        
+    # returns (eventTitle,eventDescription,eventCategory,room,start) tuples
     def query(self, title, category, rect=None, room=None):
         queryResult = []
         roomResult = []
@@ -313,7 +330,7 @@ class Organization:
                     ):
                         # Append (room,[(eventId,starttime,endtime)])
                         roomResult.append(value)
-            #Checking room name too, if room is given
+            # Checking room name too, if room is given
             else:
                 for _, value in self.roomList.items():
                     if (
@@ -329,40 +346,50 @@ class Organization:
             # Matching rooms with given room name
             for _, value in self.roomList.items():
                 if value[0].getName() == room:
-                    roomResult.append(value)                
-        #pdb.set_trace()
+                    roomResult.append(value)
+        # pdb.set_trace()
         for event in eventResult:
             for room in roomResult:
-                #Check room has reservations
+                # Check room has reservations
                 if room[1] != []:
                     if event.getId() == room[1][0][0]:
-                        queryResult.append((event.getTitle(),event.getDescription(),event.getCategory(),room[0].getName(),str(room[1][0][1])))
+                        queryResult.append(
+                            (
+                                event.getTitle(),
+                                event.getDescription(),
+                                event.getCategory(),
+                                room[0].getName(),
+                                str(room[1][0][1]),
+                            )
+                        )
         return queryResult
-    
-    #Day view
+
+    # Day view
     # First item is room object, second is list (eventId,start,end)
     # '%Y-%m-%d-%H:%M' date format
     def getEventsByDays(self):
         events = {}
-        for _,room in self.getRoomList().items():
-            for eventId,start,end in room[1]:
+        for _, room in self.getRoomList().items():
+            for eventId, start, end in room[1]:
                 if start.strftime("%Y-%m-%d") in events.keys():
-                    events[start.strftime("%Y-%m-%d")].append(self.getEvent(eventId).getTitle())
+                    events[start.strftime("%Y-%m-%d")].append(
+                        self.getEvent(eventId).getTitle()
+                    )
                 else:
-                    events[start.strftime("%Y-%m-%d")] = [self.getEvent(eventId).getTitle()]
+                    events[start.strftime("%Y-%m-%d")] = [
+                        self.getEvent(eventId).getTitle()
+                    ]
         return events
 
-    #Room view
+    # Room view
     # First item is room object, second is list (eventId,start,end)
     # '%Y-%m-%d-%H:%M' date format
     def getEventsByRooms(self):
         events = {}
-        for _,room in self.getRoomList().items():
-            for eventId,start,end in room[1]:
+        for _, room in self.getRoomList().items():
+            for eventId, start, end in room[1]:
                 if room[0].getName() in events.keys():
                     events[room[0].getName()].append(self.getEvent(eventId).getTitle())
                 else:
                     events[room[0].getName()] = [self.getEvent(eventId).getTitle()]
-        return events                        
-            
-
+        return events

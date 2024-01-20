@@ -9,7 +9,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	
-	<title>Quick Start - Leaflet</title>
+	<title>Map</title>
 	
 	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico">
 
@@ -54,10 +54,23 @@
       .setLatLng([51.513, -0.09])
       .setContent('I am a standalone popup.')
       
+
       function onMapClick(e) {
+        var x = e.latlng.lat;
+        var y = e.latlng.lng;
         popup
           .setLatLng(e.latlng)
           .setContent(`Do you want to add a new room at this location?
+                          <form action="{% url 'reservationapp:add-room' %}" class="add-room" method="get">
+                            {% csrf_token %}
+                            {{form.as_p}}
+                            <input type="hidden" name="orgServerId" value="{{ selectedOrgServerId }}">
+                            <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                            <input type="hidden" name="addRoom" value="true">
+                            <input type="hidden" name="x" value="${x}">
+                            <input type="hidden" name="y" value="${y}">
+                            <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Yes</Button>
+                          </form>
                       `)
           .openOn(map);
       }

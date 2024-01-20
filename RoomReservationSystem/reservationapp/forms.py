@@ -4,24 +4,26 @@ from django.contrib.auth.models import User
 
 from .models import Event, Organization, Room
 
+
 class UserForm(UserCreationForm):
     username = forms.CharField()
     email = forms.EmailField()
     first_name = forms.CharField()
     password1 = forms.CharField(widget=forms.PasswordInput)
     password2 = forms.CharField(widget=forms.PasswordInput)
-    
+
     class Meta:
         model = User
-        fields = ('username','email', 'first_name', 'password1' ,'password2' )
+        fields = ("username", "email", "first_name", "password1", "password2")
+
 
 class OrganizationForm(forms.ModelForm):
     class Meta:
         model = Organization
-        fields = ['orgName', 'orgOwner']
+        fields = ["orgName", "orgOwner"]
+
 
 class RoomForm(forms.ModelForm):
-
     roomName = forms.CharField(max_length=100)
     roomCapacity = forms.IntegerField()
     roomWorkingHours = forms.CharField(max_length=100)
@@ -34,6 +36,8 @@ class RoomForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
         required=False,
     )
+    x = forms.FloatField()
+    y = forms.FloatField()
 
     class Meta:
         model = Room
@@ -43,6 +47,8 @@ class RoomForm(forms.ModelForm):
             "roomWorkingHours",
             "roomPermissions",
         )
+
+
 class EventForm(forms.ModelForm):
     eventTitle = forms.CharField()
     eventDescription = forms.CharField()
@@ -50,7 +56,7 @@ class EventForm(forms.ModelForm):
     eventCapacity = forms.IntegerField()
     eventDuration = forms.IntegerField()
     eventWeekly = forms.IntegerField()
-    eventStart = forms.CharField() #Start format is: %Y-%m-%d-%H:%M
+    eventStart = forms.CharField()  # Start format is: %Y-%m-%d-%H:%M
     eventPermissions = forms.MultipleChoiceField(
         choices=[
             ("READ", "READ"),
@@ -70,7 +76,8 @@ class EventForm(forms.ModelForm):
             "eventDuration",
             "eventWeekly",
             "eventPermissions",
-         )
+        )
+
 
 class QueryForm(forms.Form):
     X1 = forms.IntegerField()

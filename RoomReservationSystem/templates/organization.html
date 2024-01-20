@@ -76,18 +76,6 @@
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Access</Button>
                           
                       </form>
-                      <div style="display: flex; justify-content: flex-end;">
-                        <div class="form-right">
-                          <form action="{% url 'reservationapp:organization' %}" class="organization" method="post">
-                            {% csrf_token %}
-                            {{form.as_p}}
-                            <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
-                            <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
-                            <input type="hidden" name="addRoom" value="true">
-                            <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Add Room</Button>
-                          </form>
-                        </div>
-                      </div>
                     {% endif %}
                 </div>
             </div>

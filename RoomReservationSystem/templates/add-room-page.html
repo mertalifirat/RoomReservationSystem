@@ -1,0 +1,47 @@
+{% extends 'index.html' %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'css/my_profile.css' %}?v1.3">
+{#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>#}
+  <title>Organization Page</title>
+
+{% endblock %}
+<style>
+  .form-right{
+    width: 300px;
+    margin-right: 20px;
+    margin-top: 10px;
+  }
+</style>
+
+{% block content %}
+  <li class="selected">
+    <div class="cd-full-width">
+      <div class="container-fluid js-tm-page-content tm-page-pad" data-page-no="5" data-page-type="gallery">
+                <br><br><br>
+                <div class="container">
+                    {% if user_authenticated %}
+                    
+                      <div style="display: flex; justify-content: flex-end;">
+                        <div class="form-right">
+                          <form action="{% url 'reservationapp:add-room' %}" class="add-room" method="post">
+                            {% csrf_token %}
+                            {{form.as_p}}
+                            <input type="hidden" name="orgServerId" value="{{ selectedOrgServerId }}">
+                            <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                            <input type="hidden" name="addRoom" value="true">
+                            <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Add Room</Button>
+                          </form>
+                        </div>
+                      </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </li>
+
+
+{% endblock %}

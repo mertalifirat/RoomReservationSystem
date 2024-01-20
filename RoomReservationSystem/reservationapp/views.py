@@ -188,7 +188,7 @@ class ListOrganizations(LoginRequiredMixin, View):
             {
                 "user_authenticated": user_authenticated,
                 "form": form,
-                "selectedOrgServerId": selectedOrgServerId,
+                "selectedOrgId": selectedOrgServerId,
                 "selectedOrgName": selectedOrgName,
             },
         )
@@ -326,7 +326,8 @@ class MapView(LoginRequiredMixin, View):
             "command": "LIST_ROOMS",
         }
         rooms = json.loads(clientManager.getClient(user.id).make_request(serverRequest))
-        print(rooms)
+        # print(rooms)
+        roomCoordinates = []
         for room in rooms:
             # pdb.set_trace()
             Room.objects.get_or_create(
@@ -335,29 +336,21 @@ class MapView(LoginRequiredMixin, View):
                 roomCapacity=room["room_capacity"],
                 roomWorkingHours=room["room_working_hours"],
             )
-        roomCoordinates = []
+            roomCoordinates.append(
+                (
+                    room["room_name"],
+                    room["room_id"],
+                    room["room_x"],
+                    room["room_y"],
+                    room["room_capacity"],
+                    room["room_working_hours"],
+                )
+            )
         roomCollections = list(
             Room.objects.filter().only(
                 "roomId", "roomName", "roomCapacity", "roomWorkingHours"
             )
         )
-        x = 39.895547
-        y = 32.782516
-        form = RoomForm()
-        for room in roomCollections:
-            roomCoordinates.append(
-                (
-                    room.roomName,
-                    room.roomId,
-                    x,
-                    y,
-                    room.roomCapacity,
-                    room.roomWorkingHours,
-                )
-            )
-            x += 0.001
-            y += 0.001
-        # print(request)
         return render(
             request,
             "map.html",
@@ -369,6 +362,62 @@ class MapView(LoginRequiredMixin, View):
                 "roomCoordinates": roomCoordinates,
             },
         )
+
+
+class AddRoomView(LoginRequiredMixin, View):
+    def get(self, request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        # pdb.set_trace()
+        if request.GET.get("addRoom"):
+            selectedOrgServerId = request.GET.get("orgServerId")
+            selectedOrgName = request.GET.get("orgName")
+
+            x = request.GET.get("x")
+            y = request.GET.get("y")
+            print(x, y)
+            form = RoomForm(initial={"x": x, "y": y})
+            return render(
+                request,
+                "add-room-page.html",
+                {
+                    "form": form,
+                    "user_authenticated": user_authenticated,
+                    "selectedOrgServerId": selectedOrgServerId,
+                    "selectedOrgName": selectedOrgName,
+                },
+            )
+
+    def post(self, request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        selectedOrgServerId = request.POST.get("orgServerId")
+        selectedOrgName = request.POST.get("orgName")
+        # Create request
+        form = RoomForm(request.POST)
+        pdb.set_trace()
+        if form.is_valid():
+            serverRequest = {
+                "command": "ADD_ROOM",
+                "room_name": form.cleaned_data["roomName"],
+                "room_capacity": form.cleaned_data["roomCapacity"],
+                "room_working_hours": form.cleaned_data["roomWorkingHours"],
+                "room_permissions": form.cleaned_data["roomPermissions"],
+                "room_x": form.cleaned_data["x"],
+                "room_y": form.cleaned_data["y"],
+            }
+            print(clientManager.getClient(user.id).make_request(serverRequest))
+
+            return redirect("reservationapp:map")
+            # return render(
+            #     request,
+            #     "map.html",
+            #     {
+            #         "user_authenticated": user_authenticated,
+            #         "selectedOrgServerId": selectedOrgServerId,
+            #         "selectedOrgName": selectedOrgName,
+            #     },
+            # )
 
 
 class roomView(LoginRequiredMixin, View):
