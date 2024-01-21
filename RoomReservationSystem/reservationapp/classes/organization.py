@@ -235,6 +235,11 @@ class Organization:
                         )
                         start += timedelta(days=7)
                         end += timedelta(days=7)
+                return "Event is reserved successfully"
+            else:
+                return "Room capacity is not enough for the given event"
+        else:
+            return "Room is not available at the given time"
 
     # # Return available rooms iterator for the given event and rectangle
     # def findRoom(self, event, rect, start, end):

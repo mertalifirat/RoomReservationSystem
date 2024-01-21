@@ -419,8 +419,8 @@ class RequestHandler(Thread):
                                 start = datetime.strptime(
                                     request["event_start"], "%Y-%m-%d-%H:%M"
                                 )
-                                org.reserve(event, room, start)
-                                self.conn.send(str.encode("Room reserved"))
+                                message = org.reserve(event, room, start)
+                                self.conn.send(str.encode(message))
                             else:
                                 self.conn.send(
                                     "You don't have access for reserving the room".encode(

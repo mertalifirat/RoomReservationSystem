@@ -81,7 +81,16 @@
       {% for roomName,roomId, x, y, roomCapacity, roomWorkingHours in roomCoordinates %}
         <script>  
           var marker = L.marker(["{{x}}","{{y}}"]).addTo(map);
-          marker.bindPopup("<b>{{roomName}}</b><br>Capacity: {{roomCapacity}} <br>Working Hours: {{roomWorkingHours}}").openPopup();
+          marker.bindPopup(`<b>{{roomName}}</b><br>Capacity: {{roomCapacity}} <br>Working Hours: {{roomWorkingHours}} \n
+                          <form action="{% url 'reservationapp:room' %}" class="room" method="get">
+                            {% csrf_token %}
+                            {{form.as_p}}
+                            <input type="hidden" name="orgServerId" value="{{ selectedOrgServerId }}">
+                            <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                            <input type="hidden" name="roomServerId" value="{{ roomId }}">
+                            <input type="hidden" name="roomName" value="{{ roomName }}">
+                            <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Go to Room Details for reserve</Button>
+                          </form>`).openPopup();
         </script>
       {% endfor %}
     {% endif %}
@@ -92,51 +101,13 @@
 
     
   {% endif %}
-  
-  
-  <!-- <script>
-  
-    const map = L.map('map');
-
-    map.setView([(39.895547, 32.782516)], 13);
-  
-    const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    });
-  
-    // const marker = L.marker([51.5, -0.09]).addTo(map)
-    //   .bindPopup('<b>Hello world!</b><br />I am a popup.').openPopup();
-  
-    // const circle = L.circle([51.508, -0.11], {
-    //   color: 'red',
-    //   fillColor: '#f03',
-    //   fillOpacity: 0.5,
-    //   radius: 500
-    // }).addTo(map).bindPopup('I am a circle.');
-  
-    // const polygon = L.polygon([
-    //   [51.509, -0.08],
-    //   [51.503, -0.06],
-    //   [51.51, -0.047]
-    // ]).addTo(map).bindPopup('I am a polygon.');
-  
-  
-    
-  
-    function onMapClick(e) {
-      popup
-        .setLatLng(e.latlng)
-        .setContent(`You clicked the map at ${e.latlng.toString()}`)
-        .openOn(map);
-    }
-  
-    
-  
-  </script> -->
+  <form action="{% url 'reservationapp:organization' %}" class="organization" method="get" >
+    {% csrf_token %}
+    <input type="hidden" name="orgServerId" value="{{ selectedOrgServerId }}">
+    <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+    <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Back</Button>
+  </form> 
   
   </body>
-
-  
 
 {% endblock %}

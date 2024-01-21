@@ -424,10 +424,10 @@ class roomView(LoginRequiredMixin, View):
     def get(self, request):
         user = request.user
         user_authenticated = user.is_authenticated
-        selectedRoomServerId = request.POST.get("roomServerId")
-        selectedRoomName = request.POST.get("roomName")
-        selectedOrgServerId = request.POST.get("orgServerId")
-        selectedOrgName = request.POST.get("orgName")
+        selectedRoomServerId = request.GET.get("roomServerId")
+        selectedRoomName = request.GET.get("roomName")
+        selectedOrgServerId = request.GET.get("orgServerId")
+        selectedOrgName = request.GET.get("orgName")
         form = EventForm()
         # print(request)
         return render(
@@ -450,7 +450,7 @@ class roomView(LoginRequiredMixin, View):
         selectedOrgName = request.POST.get("orgName")
         selectedRoomServerId = request.POST.get("roomServerId")
         selectedRoomName = request.POST.get("roomName")
-
+        pdb.set_trace()
         if request.POST.get("listReservedEvents"):
             # Create request
             serverRequest = {
@@ -461,20 +461,6 @@ class roomView(LoginRequiredMixin, View):
                 clientManager.getClient(user.id).make_request(serverRequest)
             )
             eventHours = {}
-            print(events)
-            for event in events:
-                Event.objects.get_or_create(
-                    eventId=event["event_id"],
-                    eventTitle=event["event_title"],
-                    eventCategory=event["event_category"],
-                    eventDescription=event["event_description"],
-                    eventHours=event["event_hours"],
-                )
-            eventCollections = list(
-                Event.objects.filter().only(
-                    "eventTitle", "eventCategory", "eventDescription"
-                )
-            )
             form = EventForm()
             return render(
                 request,
@@ -486,7 +472,7 @@ class roomView(LoginRequiredMixin, View):
                     "selectedOrgName": selectedOrgName,
                     "selectedRoomServerId": selectedRoomServerId,
                     "selectedRoomName": selectedRoomName,
-                    "events": eventCollections,
+                    "events": events,
                     "eventHours": eventHours,
                 },
             )
@@ -507,7 +493,7 @@ class roomView(LoginRequiredMixin, View):
                     "event_permissions": form.cleaned_data["eventPermissions"],
                     "event_start": form.cleaned_data["eventStart"],
                 }
-                print(clientManager.getClient(user.id).make_request(serverRequest))
+                message = clientManager.getClient(user.id).make_request(serverRequest)
                 form = EventForm()
                 return render(
                     request,
@@ -519,6 +505,7 @@ class roomView(LoginRequiredMixin, View):
                         "selectedOrgName": selectedOrgName,
                         "selectedRoomServerId": selectedRoomServerId,
                         "selectedRoomName": selectedRoomName,
+                        "message": message,
                     },
                 )
         if request.POST.get("deleteReservation"):

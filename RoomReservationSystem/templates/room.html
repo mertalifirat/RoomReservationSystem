@@ -23,17 +23,21 @@
       <div class="container-fluid js-tm-page-content tm-page-pad" data-page-no="5" data-page-type="gallery">
                 <br><br><br>
                 <div class="container">
+                    {% if message %}
+                      <script>
+                        alert("{{ message }}");
+                      </script>
+                    {% endif %}
                     {% if user_authenticated %}
 
                     <h1 style="font-size: 32px; margin-bottom: 8px">Room: {{ selectedRoomName }}</h1>  
                     {% if events %}
-                    <div class="row">
-
+                    <div class="row"> 
                     {% for event in events %}
                       <h3 style="margin-top:100px">Event name: {{ event.eventTitle }}</h3>
-                      <p> <b> Category: {{ event.eventCategory}} </b></p>
-                      <p> <b> Description: {{ event.eventDescription}} </b></p>
-                      <p> <b> Start time: {{ event.eventHours}} </b></p>
+                      <p> <b> Category: {{ event.event_category}} </b></p>
+                      <p> <b> Description: {{ event.event_description}} </b></p>
+                      <p> <b> Start time: {{ event.event_hours}} </b></p>
                       <form action="{% url 'reservationapp:room' %}" class="room" method="post" >
                         {% csrf_token %}
                         <input type="hidden" name="roomServerId" value="{{ selectedRoomServerId }}">
@@ -45,8 +49,8 @@
                         {% csrf_token %}
                         <input type="hidden" name="roomServerId" value="{{ selectedRoomServerId }}">
                         <input type="hidden" name="roomName" value="{{ selectedRoomName }}">
-                        <input type="hidden" name="eventServerId" value="{{ event.eventId }}">
-                        <input type="hidden" name="eventHours" value="{{ event.eventHours }}">
+                        <input type="hidden" name="eventServerId" value="{{ event.event_id }}">
+                        <input type="hidden" name="eventHours" value="{{ event.event_hours }}">
                         <input type="hidden" name="deleteReservation" value="true">
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Delete Event</Button>
                       </form>  
@@ -64,7 +68,7 @@
                         <input type="hidden" name="listReservedEvents" value="true">
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">List Events</Button>
                     </form> 
-                    <form action="{% url 'reservationapp:organization' %}" class="organization" method="get" >
+                    <form action="{% url 'reservationapp:map' %}" class="map" method="get" >
                       {% csrf_token %}
                       <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
                       <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
