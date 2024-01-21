@@ -23,12 +23,12 @@
           
                         {% for org in organizations %}
                             
-                          <h3 style="margin-top:100px">Organization name: {{ org.orgName }}</h3>
-                          <p> <b> Organization owner: {{ org.orgOwner}} </b></p>
+                          <h3 style="margin-top:100px">Organization name: {{ org.org_name }}</h3>
+                          <p> <b> Organization owner: {{ org.org_owner}} </b></p>
                           <form action="{% url 'reservationapp:list-organizations' %}" class="list-organizations" method="post">
                             {% csrf_token %}
-                            <input type="hidden" name="orgServerId" value="{{ org.orgServerId }}">
-                            <input type="hidden" name="orgName" value="{{ org.orgName }}">
+                            <input type="hidden" name="orgServerId" value="{{ org.org_id }}">
+                            <input type="hidden" name="orgName" value="{{ org.org_name }}">
                             <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Attach Organization</Button>
                           </form>
                              

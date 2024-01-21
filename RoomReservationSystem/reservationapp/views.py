@@ -149,15 +149,6 @@ class ListOrganizations(LoginRequiredMixin, View):
             clientManager.getClient(user.id).make_request(serverRequest)
         )
         print(organizations)
-        for org in organizations:
-            Organization.objects.get_or_create(
-                orgServerId=org["org_id"],
-                orgName=org["org_name"],
-                orgOwner=org["org_owner"],
-            )
-        organizationCollections = list(
-            Organization.objects.filter().only("orgName", "orgOwner")
-        )
         # pdb.set_trace()
         return render(
             request,
@@ -165,7 +156,7 @@ class ListOrganizations(LoginRequiredMixin, View):
             {
                 "form": form,
                 "user_authenticated": user_authenticated,
-                "organizations": organizationCollections,
+                "organizations": organizations,
             },
         )
 
@@ -216,40 +207,7 @@ class OrganizationView(LoginRequiredMixin, View):
         selectedOrgServerId = request.POST.get("orgServerId")
         selectedOrgName = request.POST.get("orgName")
         user_authenticated = user.is_authenticated
-        if request.POST.get("list"):
-            # Create request
-            serverRequest = {
-                "command": "LIST_ROOMS",
-            }
-            rooms = json.loads(
-                clientManager.getClient(user.id).make_request(serverRequest)
-            )
-            print(rooms)
-            for room in rooms:
-                # pdb.set_trace()
-                Room.objects.get_or_create(
-                    roomId=room["room_id"],
-                    roomName=room["room_name"],
-                    roomCapacity=room["room_capacity"],
-                    roomWorkingHours=room["room_working_hours"],
-                )
-            roomCollections = list(
-                Room.objects.filter().only(
-                    "roomId", "roomName", "roomCapacity", "roomWorkingHours"
-                )
-            )
-            form = RoomForm()
-            return render(
-                request,
-                "organization.html",
-                {
-                    "form": form,
-                    "user_authenticated": user_authenticated,
-                    "selectedOrgServerId": selectedOrgServerId,
-                    "selectedOrgName": selectedOrgName,
-                    "rooms": roomCollections,
-                },
-            )
+        
         if request.POST.get("deleteRoom"):
             # Create request
             print(request.POST.get("roomServerId"))
@@ -452,7 +410,7 @@ class roomView(LoginRequiredMixin, View):
         selectedOrgName = request.POST.get("orgName")
         selectedRoomServerId = request.POST.get("roomServerId")
         selectedRoomName = request.POST.get("roomName")
-        pdb.set_trace()
+        #pdb.set_trace()
         if request.POST.get("listReservedEvents"):
             # Create request
             serverRequest = {

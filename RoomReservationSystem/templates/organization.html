@@ -58,13 +58,7 @@
                         <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Events</Button>
                       </form>
-                      <form action="{% url 'reservationapp:organization' %}" class="organization" method="post" >
-                        {% csrf_token %}
-                        <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
-                        <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
-                        <input type="hidden" name="list" value="true">
-                        <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">List Rooms</Button>
-                      </form>
+                      
                       <form action="{% url 'reservationapp:list-organizations' %}" class="list-organizations" method="get" >
                         {% csrf_token %}
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Back</Button>

@@ -717,7 +717,7 @@ def Agent(sock):
             with Server.mutex2:
                 Server.reserve_is_active.wait()
             print("sending message")
-            sock.send("message".encode("utf8"))
+            sock.send("The room is reserved by some other user. Please refresh the page")
     # do smthng with inp
     except ConnectionClosedOK:
         print("client is terminating")
