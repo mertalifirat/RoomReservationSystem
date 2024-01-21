@@ -12,7 +12,7 @@ import pickle
 from singletonCatalgoue import Catalogue
 
 
-# {uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"):["LIST","RESERVE","DELETE"],uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"):["DELETE"]}
+# {uuid.UUID("24a6ad2b-4e27-4e37-9d2a-1aabc7ea52fc"):["LIST","RESERVE","DELETE"],uuid.UUID("bb1e0182-e1f3-4c02-9d6c-dee14d75caf1"):["DELETE"]}
 class RoomReservationSystemDemo(cmd.Cmd):
     intro = "Welcome to the Demo of the Room Reservation System. Type help or ? to list commands.\n"
     # simple data
@@ -29,7 +29,11 @@ class RoomReservationSystemDemo(cmd.Cmd):
                 "RESERVE",
                 "DELETE",
             ],
-            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["DELETE"],
+            uuid.UUID("bb1e0182-e1f3-4c02-9d6c-dee14d75caf1"): [
+                "LIST",
+                "RESERVE",
+                "DELETE",
+            ],
         },
     )
     room2 = Room(
@@ -44,7 +48,11 @@ class RoomReservationSystemDemo(cmd.Cmd):
                 "RESERVE",
                 "DELETE",
             ],
-            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["DELETE"],
+            uuid.UUID("bb1e0182-e1f3-4c02-9d6c-dee14d75caf1"): [
+                "LIST",
+                "RESERVE",
+                "DELETE",
+            ],
         },
     )
     room3 = Room(
@@ -59,7 +67,11 @@ class RoomReservationSystemDemo(cmd.Cmd):
                 "RESERVE",
                 "DELETE",
             ],
-            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["DELETE"],
+            uuid.UUID("bb1e0182-e1f3-4c02-9d6c-dee14d75caf1"): [
+                "LIST",
+                "RESERVE",
+                "DELETE",
+            ],
         },
     )
     room4 = Room(
@@ -74,7 +86,11 @@ class RoomReservationSystemDemo(cmd.Cmd):
                 "RESERVE",
                 "DELETE",
             ],
-            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["DELETE"],
+            uuid.UUID("bb1e0182-e1f3-4c02-9d6c-dee14d75caf1"): [
+                "LIST",
+                "RESERVE",
+                "DELETE",
+            ],
         },
     )
 
@@ -88,7 +104,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         # datetime(2022,2,1),
         {
             uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"): ["READ", "WRITE"],
-            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["READ"],
+            uuid.UUID("bb1e0182-e1f3-4c02-9d6c-dee14d75caf1"): ["READ", "WRITE"],
         },
     )
     event2 = Event(
@@ -100,7 +116,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         None,
         {
             uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"): ["READ", "WRITE"],
-            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["READ"],
+            uuid.UUID("bb1e0182-e1f3-4c02-9d6c-dee14d75caf1"): ["READ", "WRITE"],
         },
     )
     event3 = Event(
@@ -112,7 +128,7 @@ class RoomReservationSystemDemo(cmd.Cmd):
         None,
         {
             uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"): ["READ", "WRITE"],
-            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["READ"],
+            uuid.UUID("bb1e0182-e1f3-4c02-9d6c-dee14d75caf1"): ["READ", "WRITE"],
         },
     )
 
@@ -128,7 +144,11 @@ class RoomReservationSystemDemo(cmd.Cmd):
                 "ADD",
                 "ACCESS",
             ],
-            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["ACCESS"],
+            uuid.UUID("bb1e0182-e1f3-4c02-9d6c-dee14d75caf1"): [
+                "LIST",
+                "ADD",
+                "ACCESS",
+            ],
         },
     )  # Create a 2D array with None values
 
@@ -142,7 +162,11 @@ class RoomReservationSystemDemo(cmd.Cmd):
                 "ADD",
                 "ACCESS",
             ],
-            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["ACCESS"],
+            uuid.UUID("bb1e0182-e1f3-4c02-9d6c-dee14d75caf1"): [
+                "LIST",
+                "ADD",
+                "ACCESS",
+            ],
         },
     )  # Create a 2D array with None values
 
@@ -156,7 +180,11 @@ class RoomReservationSystemDemo(cmd.Cmd):
                 "ADD",
                 "ACCESS",
             ],
-            uuid.UUID("d7eb60b7-3cd3-41bc-b758-1f76d22e1748"): ["ACCESS"],
+            uuid.UUID("bb1e0182-e1f3-4c02-9d6c-dee14d75caf1"): [
+                "LIST",
+                "ADD",
+                "ACCESS",
+            ],
         },
     )  # Create a 2D array with None values
 
@@ -172,9 +200,11 @@ class RoomReservationSystemDemo(cmd.Cmd):
 
     user1 = User("doruk", "doruk@localhost.com", "doruko", "mert1234")
     user1.update_userId(uuid.UUID("e3a7d696-6660-4f7b-ae22-8c0664472e4c"))
-
+    user2 = User("mert", "mert@localhost.com", "mert", "doruk1234")
+    user2.update_userId(uuid.UUID("bb1e0182-e1f3-4c02-9d6c-dee14d75caf1"))
     catalogue = Catalogue()
     catalogue.addUser(user1)
+    catalogue.addUser(user2)
     catalogue.addOrganization(organization)
     catalogue.addOrganization(organization2)
     catalogue.addOrganization(organization3)

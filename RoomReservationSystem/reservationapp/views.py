@@ -429,6 +429,7 @@ class roomView(LoginRequiredMixin, View):
         selectedOrgServerId = request.GET.get("orgServerId")
         selectedOrgName = request.GET.get("orgName")
         form = EventForm()
+        client_notification_port = clientManager.getClient(user.id).notification_port
         # print(request)
         return render(
             request,
@@ -440,6 +441,7 @@ class roomView(LoginRequiredMixin, View):
                 "selectedOrgName": selectedOrgName,
                 "selectedRoomServerId": selectedRoomServerId,
                 "selectedRoomName": selectedRoomName,
+                "client_notification_port": client_notification_port,
             },
         )
 
@@ -628,6 +630,7 @@ class DayView(LoginRequiredMixin, View):
         serverRequest = {
             "command": "DAY_VIEW",
         }
+        pdb.set_trace()
         dayViewResult = json.loads(
             clientManager.getClient(user.id).make_request(serverRequest)
         )

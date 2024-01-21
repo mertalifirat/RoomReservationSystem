@@ -25,12 +25,30 @@
                 <div class="container">
                     {% if user_authenticated %}
                     <h1 style="font-size: 32px; margin-bottom: 8px">Day Organization: {{ selectedOrgName }}</h1>
+                    
                     {% if events %}
                       {% for key, value in events.items %}
-                        <p><b>{{ key }}</b></p>
-                        {% for event in value %}
-                          <p><b>{{ event }}</b></p>
-                        {% endfor %}
+                        <table id="eventTable">
+                          <thead>
+                            <tr>
+                              <th>{{key}}</th>
+                      
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for val in value %}
+                            <tr>
+                              
+                                <td>{{val}}</td>
+      
+                            </tr>
+                            
+                            {% endfor %}
+                            
+                          </tbody>
+                        </table>
+                        
+                        
                       {% endfor %}
                     {% endif %}
                     <form action="{% url 'reservationapp:dayView' %}" class="dayView" method="post" >

@@ -35,6 +35,12 @@
                             <input type="hidden" name="addRoom" value="true">
                             <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Add Room</Button>
                           </form>
+                          <form action="{% url 'reservationapp:map' %}" class="map" method="get" >
+                            {% csrf_token %}
+                            <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
+                            <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                            <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Back</Button>
+                          </form> 
                         </div>
                       </div>
                     {% endif %}

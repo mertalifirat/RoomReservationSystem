@@ -1,4 +1,4 @@
-from threading import Thread, Lock, Condition
+from threading import Thread, Lock, Condition, RLock
 import socket
 import sys
 import sqlite3
@@ -14,10 +14,16 @@ import pdb
 from datetime import datetime
 from singletonCatalgoue import Catalogue
 import uuid
+import asyncio
+from websockets.server import serve
+from websockets.sync import server
+from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 
 
 class Server:
     mutex = Lock()
+    mutex2 = RLock()
+    reserve_is_active = Condition(mutex2)
     organization_and_user_list = Catalogue()
     userList = {}
 
@@ -50,21 +56,23 @@ class Server:
             print("new client")
             RequestHandler(conn, addr, self.db).start()
 
-    def start_notification_server(self):
-        # For notifications
-        self.notifcation_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.notifcation_sock.bind(("", self.notification_port))
-        self.notifcation_sock.listen()
+    # def start_notification_server(self):
+    #     # For notifications
+    #     self.notifcation_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #     self.notifcation_sock.bind(("", self.notification_port))
+    #     self.notifcation_sock.listen()
 
-        while True:
-            conn, addr = self.notifcation_sock.accept()
-            NotificationHandler(conn, addr, self.db).start()
+    #     while True:
+    #         conn, addr = self.notifcation_sock.accept()
+    #         NotificationHandler(conn, addr, self.db).start()
 
     def start_server(self):
         request_server = Thread(target=self.start_request_server)
         request_server.start()
-        notification_server = Thread(target=self.start_notification_server)
-        notification_server.start()
+
+        NotificationHandler()
+        # notification_server = Thread(target=self.start_notification_server)
+        # notification_server.start()
 
 
 class RequestHandler(Thread):
@@ -419,7 +427,9 @@ class RequestHandler(Thread):
                                 start = datetime.strptime(
                                     request["event_start"], "%Y-%m-%d-%H:%M"
                                 )
+
                                 message = org.reserve(event, room, start)
+
                                 self.conn.send(str.encode(message))
                             else:
                                 self.conn.send(
@@ -427,6 +437,8 @@ class RequestHandler(Thread):
                                         "utf8"
                                     )
                                 )
+                            with Server.mutex2:
+                                Server.reserve_is_active.notify_all()
                     else:
                         self.conn.send("Not authorized, please login".encode("utf8"))
 
@@ -699,44 +711,30 @@ class RequestHandler(Thread):
         self.conn.close()
 
 
-class NotificationHandler(Thread):
-    def __init__(self, conn, addr, db):
-        self.conn = conn
-        self.addr = addr
-        self.current = 0
-        self.db = db
-        Thread.__init__(self)
+def Agent(sock):
+    try:
+        while True:
+            with Server.mutex2:
+                Server.reserve_is_active.wait()
+            print("sending message")
+            sock.send("message".encode("utf8"))
+    # do smthng with inp
+    except ConnectionClosedOK:
+        print("client is terminating")
+    except ConnectionClosedError:
+        print("client generated error")
 
-    def run(self):
-        # For notifications
-        print("Notification server started")
-        client_user_id = None
-        notexit = True
-        received_msg = self.conn.recv(1024)
-        while notexit and received_msg != b"":
-            decode8 = received_msg.decode("utf8")
-            try:
-                request = json.loads(decode8)
-            except JSONDecodeError:
-                notexit = False
 
-            request_type = request["command"]
-            request["user_id"] = client_user_id
-
-            if request_type == "EXIT":
-                notexit = False
-                self.conn.send("Exit successful".encode("utf8"))
-
-            received_msg = self.conn.recv(1024)
-
-        # Kill connection
-        self.conn.close()
+class NotificationHandler:
+    def __init__(self):
+        srv = server.serve(Agent, host="localhost", port=1428)
+        srv.serve_forever()
 
 
 if __name__ == "__main__":
-    server = Server(1422, 1428)
+    serverXX = Server(1422, 1428)
     try:
-        server.start_server()
+        serverXX.start_server()
     except KeyboardInterrupt:
         print("Server shutdown")
         pickle.dump(Server.organization_and_user_list, open("organizations.p", "wb"))
