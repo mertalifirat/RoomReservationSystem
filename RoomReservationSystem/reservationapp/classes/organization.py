@@ -378,11 +378,13 @@ class Organization:
             for eventId, start, end in room[1]:
                 if start.strftime("%Y-%m-%d") in events.keys():
                     events[start.strftime("%Y-%m-%d")].append(
-                        self.getEvent(eventId).getTitle()
+                        (str(eventId),
+                        self.getEvent(eventId).getTitle())
                     )
                 else:
                     events[start.strftime("%Y-%m-%d")] = [
-                        self.getEvent(eventId).getTitle()
+                        (str(eventId),
+                        self.getEvent(eventId).getTitle())
                     ]
         return events
 

@@ -24,38 +24,19 @@
                 <br><br><br>
                 <div class="container">
                     {% if user_authenticated %}
-                    <h1 style="font-size: 32px; margin-bottom: 8px">Organization: {{ selectedOrgName }}</h1>  
-
-                      {% if rooms %}
-                        {%for room in rooms %}
-                        <h3 style="margin-top:100px">Room name: {{ room.roomName }}</h3>
-                          <p> <b> Capacity: {{ room.roomCapacity}} </b></p>
-                          <p> <b> Working Hours: {{ room.roomWorkingHours}} </b></p>
-
-                          <form action="{% url 'reservationapp:organization' %}" class="organization" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
-                            <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
-                            <input type="hidden" name="roomServerId" value="{{ room.roomId }}">
-                            <input type="hidden" name="roomName" value="{{ room.roomName }}">
-                            <input type="hidden" name="showRoom" value="true">
-                            <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Room Info</Button>
-                          </form>
-
-                          {% endfor %}
-                      {% endif %}
-
+                    <h1 style="font-size: 32px; margin-bottom: 8px">Organization: {{ orgName }}</h1>  
+                    
                      <form action="{% url 'reservationapp:map' %}" class="map" method="get" >
                         {% csrf_token %}
-                        <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
-                        <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                        <input type="hidden" name="orgServerId" value="{{ orgServerId }}">
+                        <input type="hidden" name="orgName" value="{{ orgName }}">
                         <input type="hidden" name="list" value="true">
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Map</Button>
                       </form>
                       <form action="{% url 'reservationapp:event' %}" class="event" method="get" >
                         {% csrf_token %}
-                        <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
-                        <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                        <input type="hidden" name="orgServerId" value="{{ orgServerId }}">
+                        <input type="hidden" name="orgName" value="{{ orgName }}">
                         <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Events</Button>
                       </form>
                       

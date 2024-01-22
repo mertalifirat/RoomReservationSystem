@@ -30,15 +30,15 @@
                           <form action="{% url 'reservationapp:add-room' %}" class="add-room" method="post">
                             {% csrf_token %}
                             {{form.as_p}}
-                            <input type="hidden" name="orgServerId" value="{{ selectedOrgServerId }}">
-                            <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                            <input type="hidden" name="orgServerId" value="{{ orgServeId }}">
+                            <input type="hidden" name="orgName" value="{{ orgName }}">
                             <input type="hidden" name="addRoom" value="true">
                             <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Add Room</Button>
                           </form>
                           <form action="{% url 'reservationapp:map' %}" class="map" method="get" >
                             {% csrf_token %}
-                            <input type="hidden" name="orgServerId" value="{{ selectedOrgId }}">
-                            <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                            <input type="hidden" name="orgServerId" value="{{ orgServerId }}">
+                            <input type="hidden" name="orgName" value="{{ orgName }}">
                             <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Back</Button>
                           </form> 
                         </div>

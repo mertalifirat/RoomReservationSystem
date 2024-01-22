@@ -64,8 +64,8 @@
                           <form action="{% url 'reservationapp:add-room' %}" class="add-room" method="get">
                             {% csrf_token %}
                             {{form.as_p}}
-                            <input type="hidden" name="orgServerId" value="{{ selectedOrgServerId }}">
-                            <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                            <input type="hidden" name="orgServerId" value="{{ orgServerId }}">
+                            <input type="hidden" name="orgName" value="{{ orgName }}">
                             <input type="hidden" name="addRoom" value="true">
                             <input type="hidden" name="x" value="${x}">
                             <input type="hidden" name="y" value="${y}">
@@ -85,8 +85,8 @@
                           <form action="{% url 'reservationapp:room' %}" class="room" method="get">
                             {% csrf_token %}
                             {{form.as_p}}
-                            <input type="hidden" name="orgServerId" value="{{ selectedOrgServerId }}">
-                            <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+                            <input type="hidden" name="orgServerId" value="{{ orgServerId }}">
+                            <input type="hidden" name="orgName" value="{{ orgName }}">
                             <input type="hidden" name="roomServerId" value="{{ roomId }}">
                             <input type="hidden" name="roomName" value="{{ roomName }}">
                             <Button style="margin-top: 5px;" class="btn btn-dark btn-lg" type="submit">Go to Room Details for reserve</Button>
@@ -103,8 +103,8 @@
   {% endif %}
   <form action="{% url 'reservationapp:organization' %}" class="organization" method="get" >
     {% csrf_token %}
-    <input type="hidden" name="orgServerId" value="{{ selectedOrgServerId }}">
-    <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+    <input type="hidden" name="orgServerId" value="{{ orgServerId }}">
+    <input type="hidden" name="orgName" value="{{ orgName }}">
     <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Back</Button>
   </form> 
   

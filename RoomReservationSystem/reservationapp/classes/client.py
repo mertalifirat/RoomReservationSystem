@@ -80,9 +80,11 @@ class Client:
             ):  # Start and end are in format: %Y-%m-%d-%H:%M
                 self.request_sock.send(str.encode(json.dumps(request)))
                 return self.request_sock.recv(1024).decode("utf8")
+            
             elif request_type == "READ_EVENT":
                 self.request_sock.send(str.encode(json.dumps(request)))
                 return self.request_sock.recv(4096).decode("utf8")
+            
             elif request_type == "UPDATE_EVENT":
                 self.request_sock.send(str.encode(json.dumps(request)))
                 return self.request_sock.recv(1024).decode("utf8")

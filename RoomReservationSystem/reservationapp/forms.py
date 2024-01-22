@@ -32,6 +32,7 @@ class RoomForm(forms.ModelForm):
             ("LIST", "LIST"),
             ("DELETE", "DELETE"),
             ("ADD", "ADD"),
+            ("RESERVE", "RESERVE"),
         ],
         widget=forms.CheckboxSelectMultiple,
         required=False,

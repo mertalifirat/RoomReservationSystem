@@ -36,4 +36,5 @@ urlpatterns = [
     path("dayView", DayView.as_view(), name="dayView"),
     path("roomView", RoomView.as_view(), name="roomView"),
     path("add-room", AddRoomView.as_view(), name="add-room"),
+    path("eventUpdate", EventUpdate.as_view(), name="eventUpdate"),
 ]

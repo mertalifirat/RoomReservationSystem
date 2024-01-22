@@ -162,8 +162,8 @@ class ListOrganizations(LoginRequiredMixin, View):
 
     def post(self, request):
         user = request.user
-        selectedOrgServerId = request.POST.get("orgServerId")
-        selectedOrgName = request.POST.get("orgName")
+        orgServerId = request.POST.get("orgServerId")
+        orgName = request.POST.get("orgName")
         user_authenticated = user.is_authenticated
         form = RoomForm()
         # Create request
@@ -179,8 +179,8 @@ class ListOrganizations(LoginRequiredMixin, View):
             {
                 "user_authenticated": user_authenticated,
                 "form": form,
-                "selectedOrgId": selectedOrgServerId,
-                "selectedOrgName": selectedOrgName,
+                "orgServerId": orgServerId,
+                "orgName": orgName,
             },
         )
 
@@ -189,45 +189,25 @@ class OrganizationView(LoginRequiredMixin, View):
     def get(self, request):
         user = request.user
         user_authenticated = user.is_authenticated
-        selectedOrgServerId = request.GET.get("orgServerId")
-        selectedOrgName = request.GET.get("orgName")
+        orgServerId = request.GET.get("orgServerId")
+        orgName = request.GET.get("orgName")
         # print(request)
         return render(
             request,
             "organization.html",
             {
                 "user_authenticated": user_authenticated,
-                "selectedOrgServerId": selectedOrgServerId,
-                "selectedOrgName": selectedOrgName,
+                "orgServerId": orgServerId,
+                "orgName": orgName,
             },
         )
 
     def post(self, request):
         user = request.user
-        selectedOrgServerId = request.POST.get("orgServerId")
-        selectedOrgName = request.POST.get("orgName")
+        orgServerId = request.POST.get("orgServerId")
+        orgName = request.POST.get("orgName")
         user_authenticated = user.is_authenticated
         
-        if request.POST.get("deleteRoom"):
-            # Create request
-            print(request.POST.get("roomServerId"))
-            serverRequest = {
-                "command": "DELETE_ROOM",
-                "room_id": request.POST.get("roomServerId"),
-            }
-            print(clientManager.getClient(user.id).make_request(serverRequest))
-            Room.objects.filter(roomId=request.POST.get("roomServerId")).delete()
-            form = RoomForm()
-            return render(
-                request,
-                "organization.html",
-                {
-                    "form": form,
-                    "user_authenticated": user_authenticated,
-                    "selectedOrgServerId": selectedOrgServerId,
-                    "selectedOrgName": selectedOrgName,
-                },
-            )
         if request.POST.get("addRoom"):
             # Create request
             form = RoomForm(request.POST)
@@ -249,16 +229,16 @@ class OrganizationView(LoginRequiredMixin, View):
                     {
                         "form": form,
                         "user_authenticated": user_authenticated,
-                        "selectedOrgServerId": selectedOrgServerId,
-                        "selectedOrgName": selectedOrgName,
+                        "orgServerId": orgServerId,
+                        "orgName": orgName,
                     },
                 )
         if request.POST.get("showRoom"):
             # Go to room page
             selectedRoomId = request.POST.get("roomServerId")
             selectedRoomName = request.POST.get("roomName")
-            selectedOrgServerId = request.POST.get("orgServerId")
-            selectedOrgName = request.POST.get("orgName")
+            orgServerId = request.POST.get("orgServerId")
+            orgName = request.POST.get("orgName")
             form = EventForm()
             return render(
                 request,
@@ -266,8 +246,8 @@ class OrganizationView(LoginRequiredMixin, View):
                 {
                     "form": form,
                     "user_authenticated": user_authenticated,
-                    "selectedOrgServerId": selectedOrgServerId,
-                    "selectedOrgName": selectedOrgName,
+                    "orgServerId": orgServerId,
+                    "orgName": orgName,
                     "selectedRoomServerId": selectedRoomId,
                     "selectedRoomName": selectedRoomName,
                 },
@@ -278,8 +258,8 @@ class MapView(LoginRequiredMixin, View):
     def get(self, request):
         user = request.user
         user_authenticated = user.is_authenticated
-        selectedOrgServerId = request.GET.get("orgServerId")
-        selectedOrgName = request.GET.get("orgName")
+        orgServerId = request.GET.get("orgServerId")
+        orgName = request.GET.get("orgName")
         serverRequest = {
             "command": "LIST_ROOMS",
         }
@@ -314,8 +294,8 @@ class MapView(LoginRequiredMixin, View):
             "map.html",
             {
                 "user_authenticated": user_authenticated,
-                "selectedOrgServerId": selectedOrgServerId,
-                "selectedOrgName": selectedOrgName,
+                "orgServerId": orgServerId,
+                "orgName": orgName,
                 "roomCollections": roomCollections,
                 "roomCoordinates": roomCoordinates,
             },
@@ -328,8 +308,8 @@ class AddRoomView(LoginRequiredMixin, View):
         user_authenticated = user.is_authenticated
         # pdb.set_trace()
         if request.GET.get("addRoom"):
-            selectedOrgServerId = request.GET.get("orgServerId")
-            selectedOrgName = request.GET.get("orgName")
+            orgServerId = request.GET.get("orgServerId")
+            orgName = request.GET.get("orgName")
 
             x = request.GET.get("x")
             y = request.GET.get("y")
@@ -341,19 +321,19 @@ class AddRoomView(LoginRequiredMixin, View):
                 {
                     "form": form,
                     "user_authenticated": user_authenticated,
-                    "selectedOrgServerId": selectedOrgServerId,
-                    "selectedOrgName": selectedOrgName,
+                    "orgServerId": orgServerId,
+                    "orgName": orgName,
                 },
             )
 
     def post(self, request):
         user = request.user
         user_authenticated = user.is_authenticated
-        selectedOrgServerId = request.POST.get("orgServerId")
-        selectedOrgName = request.POST.get("orgName")
+        orgServerId = request.POST.get("orgServerId")
+        orgName = request.POST.get("orgName")
         # Create request
         form = RoomForm(request.POST)
-        pdb.set_trace()
+        # pdb.set_trace()
         if form.is_valid():
             serverRequest = {
                 "command": "ADD_ROOM",
@@ -372,8 +352,8 @@ class AddRoomView(LoginRequiredMixin, View):
             #     "map.html",
             #     {
             #         "user_authenticated": user_authenticated,
-            #         "selectedOrgServerId": selectedOrgServerId,
-            #         "selectedOrgName": selectedOrgName,
+            #         "orgServerId": orgServerId,
+            #         "orgName": orgName,
             #     },
             # )
 
@@ -384,8 +364,8 @@ class roomView(LoginRequiredMixin, View):
         user_authenticated = user.is_authenticated
         selectedRoomServerId = request.GET.get("roomServerId")
         selectedRoomName = request.GET.get("roomName")
-        selectedOrgServerId = request.GET.get("orgServerId")
-        selectedOrgName = request.GET.get("orgName")
+        orgServerId = request.GET.get("orgServerId")
+        orgName = request.GET.get("orgName")
         form = EventForm()
         client_notification_port = clientManager.getClient(user.id).notification_port
         # print(request)
@@ -395,8 +375,8 @@ class roomView(LoginRequiredMixin, View):
             {
                 "user_authenticated": user_authenticated,
                 "form": form,
-                "selectedOrgServerId": selectedOrgServerId,
-                "selectedOrgName": selectedOrgName,
+                "orgServerId": orgServerId,
+                "orgName": orgName,
                 "selectedRoomServerId": selectedRoomServerId,
                 "selectedRoomName": selectedRoomName,
                 "client_notification_port": client_notification_port,
@@ -406,11 +386,28 @@ class roomView(LoginRequiredMixin, View):
     def post(self, request):
         user = request.user
         user_authenticated = user.is_authenticated
-        selectedOrgServerId = request.POST.get("orgServerId")
-        selectedOrgName = request.POST.get("orgName")
+        orgServerId = request.POST.get("orgServerId")
+        orgName = request.POST.get("orgName")
         selectedRoomServerId = request.POST.get("roomServerId")
         selectedRoomName = request.POST.get("roomName")
         #pdb.set_trace()
+        if request.POST.get("deleteRoom"):
+            # Create request
+            print(request.POST.get("roomServerId"))
+            serverRequest = {
+                "command": "DELETE_ROOM",
+                "room_id": request.POST.get("roomServerId"),
+            }
+            print(clientManager.getClient(user.id).make_request(serverRequest))
+            return render(
+                request,
+                "organization.html",
+                {
+                    "user_authenticated": user_authenticated,
+                    "orgServerId": orgServerId,
+                    "orgName": orgName,
+                },
+            )
         if request.POST.get("listReservedEvents"):
             # Create request
             serverRequest = {
@@ -428,8 +425,8 @@ class roomView(LoginRequiredMixin, View):
                 {
                     "user_authenticated": user_authenticated,
                     "form": form,
-                    "selectedOrgServerId": selectedOrgServerId,
-                    "selectedOrgName": selectedOrgName,
+                    "orgServerId": orgServerId,
+                    "orgName": orgName,
                     "selectedRoomServerId": selectedRoomServerId,
                     "selectedRoomName": selectedRoomName,
                     "events": events,
@@ -461,8 +458,8 @@ class roomView(LoginRequiredMixin, View):
                     {
                         "user_authenticated": user_authenticated,
                         "form": form,
-                        "selectedOrgServerId": selectedOrgServerId,
-                        "selectedOrgName": selectedOrgName,
+                        "orgServerId": orgServerId,
+                        "orgName": orgName,
                         "selectedRoomServerId": selectedRoomServerId,
                         "selectedRoomName": selectedRoomName,
                         "message": message,
@@ -496,8 +493,8 @@ class roomView(LoginRequiredMixin, View):
                 {
                     "user_authenticated": user_authenticated,
                     "form": form,
-                    "selectedOrgServerId": selectedOrgServerId,
-                    "selectedOrgName": selectedOrgName,
+                    "orgServerId": orgServerId,
+                    "orgName": orgName,
                     "selectedRoomServerId": selectedRoomServerId,
                     "selectedRoomName": selectedRoomName,
                 },
@@ -508,16 +505,16 @@ class EventView(LoginRequiredMixin, View):
     def get(self, request):
         user = request.user
         user_authenticated = user.is_authenticated
-        selectedOrgServerId = request.GET.get("orgServerId")
-        selectedOrgName = request.GET.get("orgName")
+        orgServerId = request.GET.get("orgServerId")
+        orgName = request.GET.get("orgName")
         form = QueryForm()
         return render(
             request,
             "event.html",
             {
                 "user_authenticated": user_authenticated,
-                "selectedOrgServerId": selectedOrgServerId,
-                "selectedOrgName": selectedOrgName,
+                "orgServerId": orgServerId,
+                "orgName": orgName,
                 "form": form,
             },
         )
@@ -525,8 +522,8 @@ class EventView(LoginRequiredMixin, View):
     def post(self, request):
         user = request.user
         user_authenticated = user.is_authenticated
-        selectedOrgServerId = request.POST.get("orgServerId")
-        selectedOrgName = request.POST.get("orgName")
+        orgServerId = request.POST.get("orgServerId")
+        orgName = request.POST.get("orgName")
         form = QueryForm(request.POST)
 
         if form.is_valid():
@@ -556,8 +553,8 @@ class EventView(LoginRequiredMixin, View):
                 {
                     "user_authenticated": user_authenticated,
                     "form": form,
-                    "selectedOrgServerId": selectedOrgServerId,
-                    "selectedOrgName": selectedOrgName,
+                    "orgServerId": orgServerId,
+                    "orgName": orgName,
                     "queryResult": queryResult,
                 },
             )
@@ -567,28 +564,28 @@ class DayView(LoginRequiredMixin, View):
     def get(self, request):
         user = request.user
         user_authenticated = user.is_authenticated
-        selectedOrgServerId = request.GET.get("orgServerId")
-        selectedOrgName = request.GET.get("orgName")
+        orgServedId = request.GET.get("orgServerId")
+        orgName = request.GET.get("orgName")
         return render(
             request,
             "dayView.html",
             {
                 "user_authenticated": user_authenticated,
-                "selectedOrgServerId": selectedOrgServerId,
-                "selectedOrgName": selectedOrgName,
+                "orgServedId": orgServedId,
+                "orgName": orgName,
             },
         )
 
     def post(self, request):
         user = request.user
         user_authenticated = user.is_authenticated
-        selectedOrgServerId = request.POST.get("orgServerId")
-        selectedOrgName = request.POST.get("orgName")
+        orgServedId = request.POST.get("orgServerId")
+        orgName = request.POST.get("orgName")
         # Create request
         serverRequest = {
             "command": "DAY_VIEW",
         }
-        pdb.set_trace()
+        #pdb.set_trace()
         dayViewResult = json.loads(
             clientManager.getClient(user.id).make_request(serverRequest)
         )
@@ -598,8 +595,8 @@ class DayView(LoginRequiredMixin, View):
             "dayView.html",
             {
                 "user_authenticated": user_authenticated,
-                "selectedOrgServerId": selectedOrgServerId,
-                "selectedOrgName": selectedOrgName,
+                "orgServerId": orgServedId,
+                "orgName": orgName,
                 "events": dayViewResult,
             },
         )
@@ -609,23 +606,23 @@ class RoomView(LoginRequiredMixin, View):
     def get(self, request):
         user = request.user
         user_authenticated = user.is_authenticated
-        selectedOrgServerId = request.GET.get("orgServerId")
-        selectedOrgName = request.GET.get("orgName")
+        orgServerId = request.GET.get("orgServerId")
+        orgName = request.GET.get("orgName")
         return render(
             request,
             "roomView.html",
             {
                 "user_authenticated": user_authenticated,
-                "selectedOrgServerId": selectedOrgServerId,
-                "selectedOrgName": selectedOrgName,
+                "orgServerId": orgServerId,
+                "orgName": orgName,
             },
         )
 
     def post(self, request):
         user = request.user
         user_authenticated = user.is_authenticated
-        selectedOrgServerId = request.POST.get("orgServerId")
-        selectedOrgName = request.POST.get("orgName")
+        orgServerId = request.POST.get("orgServerId")
+        orgName = request.POST.get("orgName")
         # Create request
         serverRequest = {
             "command": "ROOM_VIEW",
@@ -639,8 +636,50 @@ class RoomView(LoginRequiredMixin, View):
             "roomView.html",
             {
                 "user_authenticated": user_authenticated,
-                "selectedOrgServerId": selectedOrgServerId,
-                "selectedOrgName": selectedOrgName,
+                "orgServerId": orgServerId,
+                "orgName": orgName,
                 "events": roomViewResult,
             },
         )
+
+class EventUpdate(LoginRequiredMixin,View):
+    def get(self,request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        eventId = request.GET.get("eventId")
+        orgServerId = request.GET.get("orgServerId")
+        orgName = request.GET.get("orgName")
+        form = EventForm()
+        serverRequest = {
+            "command": "READ_EVENT",
+            "event_id": eventId,
+        }
+        event = json.loads(
+                clientManager.getClient(user.id).make_request(serverRequest)
+            )
+        return render(request, "event-update.html", {"user_authenticated": user_authenticated,"event": event[0],"orgName":orgName, "orgServerId": orgServerId,"form":form})    
+    def post(self, request):
+        user = request.user
+        user_authenticated = user.is_authenticated
+        eventId = request.POST.get("event_id")
+        orgServerId = request.POST.get("orgServerId")
+        orgName = request.POST.get("orgName")
+        form = EventForm(request.POST)
+        if form.is_valid():
+            # Create request
+            # pdb.set_trace()
+            serverRequest = {
+                "command": "UPDATE_EVENT",
+                "event_id": eventId,
+                "title": form.cleaned_data["eventTitle"],
+                "category": form.cleaned_data["eventCategory"],
+                "description": form.cleaned_data["eventDescription"],
+                "capacity": form.cleaned_data["eventCapacity"],
+                "duration": form.cleaned_data["eventDuration"],
+                "weekly": form.cleaned_data["eventWeekly"],
+                "permissions": form.cleaned_data["eventPermissions"],
+                "start": form.cleaned_data["eventStart"],
+            }
+            message = clientManager.getClient(user.id).make_request(serverRequest)
+            print(message)
+            return render(request,"dayView.html",{ "user_authenticated": user_authenticated,"orgServerId": orgServerId, "orgName": orgName })

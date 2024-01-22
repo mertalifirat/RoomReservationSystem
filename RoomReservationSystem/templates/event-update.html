@@ -1,0 +1,60 @@
+{% extends 'index.html' %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'css/my_profile.css' %}?v1.3">
+{#    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>#}
+  <title>Organization Page</title>
+
+{% endblock %}
+<style>
+  .form-right{
+    width: 300px;
+    margin-right: 20px;
+    margin-top: 10px;
+  }
+</style>
+
+{% block content %}
+<li class="selected">
+  <div class="cd-full-width">
+    <div
+      class="container-fluid js-tm-page-content tm-page-pad"
+      data-page-no="5"
+      data-page-type="gallery"
+    >
+      <br /><br /><br />
+      <div class="container">
+        {% if user_authenticated %} {% if event %}
+        <h1 style="font-size: 32px; margin-bottom: 8px">Event Info</h1>
+        <p><b> Name: {{ event.event_title }} </b></p>
+        <p><b> Category: {{ event.event_category}} </b></p>
+        <p><b> Description: {{ event.event_description}} </b></p>
+        <p><b> Duration: {{ event.event_duration}} </b></p>
+        {% endif %}
+        <form
+          action="{% url 'reservationapp:eventUpdate' %}"
+          class="eventUpdate"
+          method="post"
+        >
+          {% csrf_token %} {{form.as_p}}
+          <input type="hidden" name="orgServerId" value="{{ orgServerId }}" />
+          <input type="hidden" name="orgName" value="{{ orgName }}" />
+          <input type="hidden" name="event_id" value="{{ event.event_id }}" />
+          <button
+            style="margin-top: 5px"
+            class="btn btn-dark btn-lg"
+            type="submit"
+          >
+            Update Event
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</li>
+
+{% endblock %}

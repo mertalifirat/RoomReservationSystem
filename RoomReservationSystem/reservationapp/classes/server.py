@@ -499,18 +499,39 @@ class RequestHandler(Thread):
                             org = Server.organization_and_user_list.getOrganization(
                                 organization_id
                             )
-                            event_id = uuid.UUID(request["event_id"])
-                            event = org.getEvent(event_id)
-                            eventRoomId = org.getRoomReservedByEvent(event_id)
+                            # pdb.set_trace()
+                            eventId = uuid.UUID(request["event_id"])
+                            event = org.getEvent(eventId)
+                            eventRoomId = org.getRoomReservedByEvent(eventId)
                             if eventRoomId is not None:
                                 eventRoom = org.getRoom(eventRoomId)
                             # Check if event is reserved
                             if eventRoomId is None:
                                 # Check if user has permission to read event
                                 if "READ" in event.getUserPermissions(client_user_id):
-                                    self.conn.send(
-                                        f"Event name: {event.getTitle()}, Event Description: {event.getDescription()}, Event Category: {event.getCategory()}, Event Capacity: {event.getCapacity()}\n".encode()
-                                    )
+                                    result = []
+                                    result.append({
+                                            "event_id": str(eventId),
+                                            "event_title": org.getEvent(
+                                                eventId
+                                            ).getTitle(),
+                                            "event_description": org.getEvent(
+                                                eventId
+                                            ).getDescription(),
+                                            "event_category": org.getEvent(
+                                                eventId
+                                            ).getCategory(),
+                                            "event_capacity": str(
+                                                org.getEvent(eventId).getCapacity()
+                                            ),
+                                            "event_duration": str(
+                                                org.getEvent(eventId).getDuration()
+                                            ),
+                                            "event_weekly": str(
+                                                org.getEvent(eventId).getWeekly()
+                                            ),
+                                        })
+                                    self.conn.send(str.encode(json.dumps(result)))
                                 else:
                                     self.conn.send(
                                         "You don't have access for reading the event".encode(
@@ -520,9 +541,29 @@ class RequestHandler(Thread):
                             else:
                                 # Check if user has permission to read event
                                 if "READ" in event.getUserPermissions(client_user_id):
-                                    self.conn.send(
-                                        f"Event name: {event.getTitle()}, Event Description: {event.getDescription()}, Event Category: {event.getCategory()}, Event Capacity: {event.getCapacity()}\n".encode()
-                                    )
+                                    result = []
+                                    result.append({
+                                            "event_id": str(eventId),
+                                            "event_title": org.getEvent(
+                                                eventId
+                                            ).getTitle(),
+                                            "event_description": org.getEvent(
+                                                eventId
+                                            ).getDescription(),
+                                            "event_category": org.getEvent(
+                                                eventId
+                                            ).getCategory(),
+                                            "event_capacity": str(
+                                                org.getEvent(eventId).getCapacity()
+                                            ),
+                                            "event_duration": str(
+                                                org.getEvent(eventId).getDuration()
+                                            ),
+                                            "event_weekly": str(
+                                                org.getEvent(eventId).getWeekly()
+                                            ),
+                                        })
+                                    self.conn.send(str.encode(json.dumps(result)))
                                 else:
                                     self.conn.send(
                                         f"{eventRoom.getName()} is busy".encode("utf8")
@@ -550,11 +591,10 @@ class RequestHandler(Thread):
                             # Check if user has permission to update event
                             if "WRITE" in event.getUserPermissions(client_user_id):
                                 weekly = None
-                                permissions = {}
-                                if request["weekly"] != "None":
-                                    weekly = datetime.strptime(
-                                        request["weekly"], "%Y-%m-%d-%H:%M"
-                                    )
+                                
+                                permissions = {
+                                    client_user_id: request["permissions"]
+                                }
                                 org.updateEvent(
                                     event_id,
                                     request["title"],

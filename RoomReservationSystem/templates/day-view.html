@@ -66,8 +66,8 @@
   {% endif %}
   <form action="{% url 'reservationapp:organization' %}" class="organization" method="get" >
     {% csrf_token %}
-    <input type="hidden" name="orgServerId" value="{{ selectedOrgServerId }}">
-    <input type="hidden" name="orgName" value="{{ selectedOrgName }}">
+    <input type="hidden" name="orgServerId" value="{{ orgServeId }}">
+    <input type="hidden" name="orgName" value="{{ orgName }}">
     <Button   style="margin-top: 5px; " class="btn btn-dark btn-lg" type="submit">Back</Button>
   </form> 
   
